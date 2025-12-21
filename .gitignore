@@ -1,29 +1,24 @@
 # Node
-node_modules/
-npm-debug.log
-yarn.lock
+**/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Env
-.env
+**/.env
 
-# Logs
-logs/
-*.log
+# Build / cache
+**/.cache
+**/dist
+**/build
+**/.next
+**/.turbo
 
-# OS
+# OS / Editor
 .DS_Store
 Thumbs.db
-
-# Build
-dist/
-build/
-
-# IDE
 .vscode/
 .idea/
 
-# Database dumps
+# SQL dumps (si no quieres subirlos)
 *.sql
-
-# Railway
-.railway/
