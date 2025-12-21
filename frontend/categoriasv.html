@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categorías | Distribuidora MyM</title>
+
+    <!-- CSS del panel -->
+    <link rel="stylesheet" href="css/stylebackend.css">
+
+    <!-- Font Awesome 6.5.1 -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+</head>
+<body class="admin-body">
+
+<div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <span class="sidebar-logo-icon">MyM</span>
+                <div class="sidebar-logo-text">
+                    <h1>Distribuidora MyM</h1>
+                    <p>Panel administrativo</p>
+                </div>
+            </div>
+        </div>
+
+                   <nav class="sidebar-nav">
+      <ul>
+        <li >
+          <a href="adminv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+                <li>
+          <a href="vendedorv.html">
+            <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span>
+            <span>Ventas</span>
+          </a>
+        </li>
+
+         <li>
+          <a href="detalle.venta.html">
+            <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
+            <span>Detalle de ventas</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="comprasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box"></i></span>
+            <span>Compras</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="clientesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+            <span>Clientes / Créditos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="inventarioav.html">
+            <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <span>Inventario</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="productosv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hotdog"></i></span>
+            <span>Productos</span>
+          </a>
+        </li>
+
+        <li class="active">
+          <a href="categoriasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
+            <span>Categorías</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="proveedoresv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-field"></i></span>
+            <span>Proveedores</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="reportesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+            <span>Reportes</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="ctasporcobrarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span>Ctas. por cobrar</span>
+          </a>
+        </li>
+        <li>
+          <a href="ctaspagarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span>Ctas. por pagar</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="rusuario.html">
+            <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+            <span>Usuarios</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+        <div class="sidebar-footer">
+            <small>Distribuidora MyM</small>
+            <small class="muted">Gestión de categorías de productos</small>
+        </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="main-area">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <button class="menu-toggle" id="sidebarToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <div class="topbar-title">
+                <h2>Gestión de categorías</h2>
+                <p>Agregar, actualizar y administrar categorías de productos.</p>
+            </div>
+
+            <div class="topbar-user">
+                <div class="user-info">
+                    <span class="user-name">Usuario: Admin</span>
+                    <span class="user-role">Distribuidora MyM</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENIDO -->
+        <main class="content">
+
+            <!-- FORMULARIO CATEGORÍA -->
+            <section class="section">
+                <div class="section-header">
+                    <h3>Agregar / Actualizar categoría</h3>
+                    <p>Registra nuevas categorías o edita las existentes.</p>
+                </div>
+
+                <div class="card user-card">
+                    <form class="user-form" id="categoriaForm">
+                        <!-- oculto para actualizar -->
+                        <input type="hidden" id="id_categoria" name="id_categoria">
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="nombre_categoria">Nombre de la categoría</label>
+                                <input type="text" id="nombre_categoria" name="nombre_categoria"
+                                       placeholder="Ej. Salchichas, Embutidos mixtos, Lácteos" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="estado">Estado</label>
+                                <select id="estado" name="estado">
+                                    <option value="activa">Activa</option>
+                                    <option value="inactiva">Inactiva</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label for="descripcion">Descripción</label>
+                                <textarea id="descripcion" name="descripcion"
+                                          rows="3"
+                                          style="resize: vertical; padding: 0.55rem 0.7rem; border-radius: 0.5rem; border: 1px solid #d1d1d1; font-size: 0.9rem; background:#fafafa; outline:none;"
+                                          placeholder="Ej. Categoría para productos de embutidos básicos, salchichas, jamones, etc."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="reset" class="btn-secondary" id="btnLimpiarCategoria">
+                                <i class="fa-solid fa-rotate-left"></i>&nbsp;Limpiar
+                            </button>
+                            <button type="submit" class="btn-primary" id="btnGuardarCategoria">
+                                <i class="fa-solid fa-tags"></i>&nbsp;
+                                Guardar categoría
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- LISTADO DE CATEGORÍAS -->
+            <section class="section">
+                <div class="section-header small">
+                    <h3>Categorías registradas</h3>
+                    <p>Listado de categorías disponibles para asignar a productos.</p>
+                </div>
+
+                <div class="card table-card">
+                    <div class="table-wrapper">
+                        <table id="tablaCategorias">
+                            <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Se llenará dinámicamente con JS desde el backend -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="admin-footer">
+            <span>&copy; <span id="year"></span> Distribuidora MyM</span>
+            <span class="footer-separator">|</span>
+            <span>Módulo de categorías</span>
+        </footer>
+
+    </div>
+</div>
+
+<script>
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const yearSpan = document.getElementById('year');
+
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+        });
+    }
+
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
+    }
+
+    // ========= LÓGICA FRONT (conectada al backend /api/categorias) =========
+
+    const categoriaForm   = document.getElementById('categoriaForm');
+    const btnGuardarCat   = document.getElementById('btnGuardarCategoria');
+    const btnLimpiarCat   = document.getElementById('btnLimpiarCategoria');
+    const tablaCategorias = document.getElementById('tablaCategorias').querySelector('tbody');
+
+    const API_BASE = '/api/categorias';
+
+    // Cargar categorías desde backend
+    async function cargarCategorias() {
+        try {
+            const res = await fetch(API_BASE);
+            if (!res.ok) throw new Error('Error al cargar categorías');
+            const data = await res.json();
+
+            tablaCategorias.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tablaCategorias.innerHTML = `
+                    <tr><td colspan="3" class="empty-row">Sin categorías registradas.</td></tr>
+                `;
+                return;
+            }
+
+            data.forEach(cat => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = cat.id_categoria;
+                tr.dataset.descripcion = cat.descripcion || '';
+
+                tr.innerHTML = `
+                    <td>${cat.nombre_categoria}</td>
+                    <td>
+                        <span class="badge ${cat.estado === 'activa' ? 'badge-success' : 'badge-danger'}">
+                            ${cat.estado === 'activa' ? 'Activa' : 'Inactiva'}
+                        </span>
+                    </td>
+                    <td class="tabla-acciones">
+                        <button type="button" class="btn-icon btn-editar" title="Editar">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button type="button" class="btn-icon btn-icon-danger btn-eliminar" title="Eliminar">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tablaCategorias.appendChild(tr);
+            });
+        } catch (err) {
+            console.error(err);
+            alert('Error al cargar las categorías.');
+        }
+    }
+
+    // Guardar / actualizar categoría
+    categoriaForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const id_categoria = document.getElementById('id_categoria').value;
+        const payload = {
+            nombre_categoria: document.getElementById('nombre_categoria').value.trim(),
+            descripcion: document.getElementById('descripcion').value.trim(),
+            estado: document.getElementById('estado').value
+        };
+
+        if (!payload.nombre_categoria) {
+            alert('El nombre de la categoría es obligatorio');
+            return;
+        }
+
+        const esEditar = !!id_categoria;
+        const url      = esEditar ? `${API_BASE}/${id_categoria}` : API_BASE;
+        const metodo   = esEditar ? 'PUT' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method: metodo,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                alert(data.message || 'Error al guardar la categoría');
+                return;
+            }
+
+            await cargarCategorias();
+            categoriaForm.reset();
+            document.getElementById('id_categoria').value = '';
+            btnGuardarCat.innerHTML = '<i class="fa-solid fa-tags"></i>&nbsp;Guardar categoría';
+            alert('Categoría guardada correctamente.');
+        } catch (err) {
+            console.error(err);
+            alert('Ocurrió un error guardando la categoría.');
+        }
+    });
+
+    // Limpiar formulario y volver a modo "guardar"
+    btnLimpiarCat.addEventListener('click', () => {
+        categoriaForm.reset();
+        document.getElementById('id_categoria').value = '';
+        btnGuardarCat.innerHTML = '<i class="fa-solid fa-tags"></i>&nbsp;Guardar categoría';
+    });
+
+    // Delegación de eventos para Editar / Eliminar
+    tablaCategorias.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+
+        const fila = btn.closest('tr');
+        if (!fila) return;
+
+        const id = fila.dataset.id;
+
+        // Editar
+        if (btn.classList.contains('btn-editar')) {
+            const celdas = fila.querySelectorAll('td');
+            document.getElementById('id_categoria').value     = id;
+            document.getElementById('nombre_categoria').value = celdas[0].textContent.trim();
+
+            const badgeText = fila.querySelector('.badge').textContent.trim().toLowerCase();
+            document.getElementById('estado').value = badgeText === 'activa' ? 'activa' : 'inactiva';
+
+            document.getElementById('descripcion').value = fila.dataset.descripcion || '';
+
+            btnGuardarCat.innerHTML = '<i class="fa-solid fa-floppy-disk"></i>&nbsp;Actualizar categoría';
+        }
+
+        // Eliminar
+        if (btn.classList.contains('btn-eliminar')) {
+            const nombre = fila.querySelector('td').textContent.trim();
+            const confirmar = confirm(`¿Seguro que deseas eliminar la categoría "${nombre}"?`);
+
+            if (!confirmar) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    alert(data.message || 'Error al eliminar la categoría');
+                    return;
+                }
+
+                await cargarCategorias();
+            } catch (err) {
+                console.error(err);
+                alert('Ocurrió un error eliminando la categoría.');
+            }
+        }
+    });
+
+    // Cargar categorías al entrar
+    cargarCategorias();
+</script>
+
+</body>
+</html>

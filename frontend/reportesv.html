@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reportes | Distribuidora MyM</title>
+
+  <link rel="stylesheet" href="css/stylebackend.css">
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    /* Estilos mejorados para reportes */
+    .grid-2r{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+    @media(max-width:980px){.grid-2r{grid-template-columns:1fr}}
+    
+    .filters{
+      display:flex;
+      gap:1rem;
+      flex-wrap:wrap;
+      align-items:end;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .filters .form-group label{
+      color: white;
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .filters input,
+    .filters select{
+      background: rgba(255,255,255,0.95);
+      border: 2px solid rgba(255,255,255,0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .filters input:focus,
+    .filters select:focus{
+      background: white;
+      border-color: white;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+    }
+    
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+      gap:1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .kpi-card{
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 4px solid;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .kpi-card::before{
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100px;
+      height: 100px;
+      opacity: 0.05;
+      font-family: "Font Awesome 6 Free";
+      font-size: 80px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .kpi-card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    
+    .kpi-card.kpi-caja{border-left-color: #10b981}
+    .kpi-card.kpi-caja::before{content: "\f555"; color: #10b981}
+    
+    .kpi-card.kpi-cxc{border-left-color: #f59e0b}
+    .kpi-card.kpi-cxc::before{content: "\f555"; color: #f59e0b}
+    
+    .kpi-card.kpi-utilidad{border-left-color: #6366f1}
+    .kpi-card.kpi-utilidad::before{content: "\f201"; color: #6366f1}
+    
+    .kpi-header{
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .kpi-icon{
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .kpi-caja .kpi-icon{background: linear-gradient(135deg, #10b981, #059669)}
+    .kpi-cxc .kpi-icon{background: linear-gradient(135deg, #f59e0b, #d97706)}
+    .kpi-utilidad .kpi-icon{background: linear-gradient(135deg, #6366f1, #4f46e5)}
+    
+    .kpi-title{
+      font-size: 0.875rem;
+      color: #6b7280;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .kpi-value{
+      font-size: 2rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0.5rem 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .kpi-details{
+      font-size: 0.813rem;
+      color: #6b7280;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .kpi-detail-item{
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .kpi-detail-item strong{
+      color: #374151;
+    }
+    
+    .section-header{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-header h3{
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #111827;
+    }
+    
+    .section-header h3 i{
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    
+    .export-btn{
+      background: white;
+      border: 2px solid #e5e7eb;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .export-btn:hover{
+      border-color: #667eea;
+      color: #667eea;
+      background: #f3f4f6;
+    }
+    
+    .badge{
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .badge-success{background: #d1fae5; color: #065f46}
+    .badge-warning{background: #fef3c7; color: #92400e}
+    .badge-danger{background: #fee2e2; color: #991b1b}
+    .badge-info{background: #dbeafe; color: #1e40af}
+    .badge-secondary{background: #e5e7eb; color: #374151}
+    
+    /* TABLAS MEJORADAS CON HEADERS NEGROS */
+    .table-wrapper{
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+    
+    table{
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    /* HEADERS NEGROS Y MUY VISIBLES */
+    table thead{
+      background: #f3f4f6;
+      border-bottom: 2px solid #667eea;
+    }
+    
+    table thead th{
+      background: transparent;
+      color: #111827;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.813rem;
+      letter-spacing: 0.5px;
+      padding: 1rem;
+      border: none;
+      text-align: left;
+      white-space: nowrap;
+    }
+    
+    table thead th i{
+      margin-right: 0.5rem;
+      color: #667eea;
+    }
+    
+    table tbody tr{
+      transition: all 0.2s ease;
+      background: white;
+    }
+    
+    table tbody tr:hover{
+      background: #f9fafb;
+      transform: scale(1.005);
+    }
+    
+    table tbody tr:nth-child(even){
+      background: #fafafa;
+    }
+    
+    table tbody tr:nth-child(even):hover{
+      background: #f3f4f6;
+    }
+    
+    table tbody td{
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid #f3f4f6;
+      color: #374151;
+      vertical-align: middle;
+    }
+    
+    table tbody tr:last-child td{
+      border-bottom: none;
+    }
+    
+    .empty-row{
+      text-align: center;
+      color: #9ca3af;
+      font-style: italic;
+      padding: 2rem !important;
+    }
+    
+    .card.highlight{
+      border: 2px solid #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+    
+    .loading{
+      display: none;
+      text-align: center;
+      padding: 2rem;
+      color: #667eea;
+    }
+    
+    .loading.active{
+      display: block;
+    }
+    
+    .loading i{
+      font-size: 2rem;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin{
+      from{transform: rotate(0deg)}
+      to{transform: rotate(360deg)}
+    }
+    
+    .stat-trend{
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .stat-trend.up{color: #10b981}
+    .stat-trend.down{color: #ef4444}
+    
+    .datetime-display{
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+    
+    .datetime-display .date{
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .datetime-display .time{
+      color: #9ca3af;
+    }
+
+    /* Números alineados a la derecha */
+    table tbody td.text-right,
+    table thead th.text-right{
+      text-align: right;
+    }
+
+    table tbody td.text-center,
+    table thead th.text-center{
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body class="admin-body">
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <span class="sidebar-logo-icon">MyM</span>
+        <div class="sidebar-logo-text">
+          <h1>Distribuidora MyM</h1>
+          <p>Panel administrativo</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul>
+        <li >
+          <a href="adminv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+                <li>
+          <a href="vendedorv.html">
+            <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span>
+            <span>Ventas</span>
+          </a>
+        </li>
+
+         <li>
+          <a href="detalle.venta.html">
+            <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
+            <span>Detalle de ventas</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="comprasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box"></i></span>
+            <span>Compras</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="clientesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+            <span>Clientes / Créditos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="inventarioav.html">
+            <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <span>Inventario</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="productosv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hotdog"></i></span>
+            <span>Productos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="categoriasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
+            <span>Categorías</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="proveedoresv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-field"></i></span>
+            <span>Proveedores</span>
+          </a>
+        </li>
+
+        <li class="active">
+          <a href="reportesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+            <span>Reportes</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="ctasporcobrarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span>Ctas. por cobrar</span>
+          </a>
+        </li>
+        <li>
+          <a href="ctaspagarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span>Ctas. por pagar</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="rusuario.html">
+            <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+            <span>Usuarios</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <small>Distribuidora MyM</small>
+      <small class="muted">Módulo de reportes</small>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-toggle" id="sidebarToggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="topbar-title">
+        <h2>Reportes Empresariales</h2>
+        <p>Análisis completo de ventas, productos, cuentas y caja.</p>
+      </div>
+
+      <div class="topbar-user">
+        <div class="user-info">
+          <span class="user-name">Usuario: Admin</span>
+          <span class="user-role">Distribuidora MyM</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+      <!-- FILTROS -->
+      <section class="section">
+        <div class="card" style="padding:0; overflow:hidden; border:none;">
+          <div class="filters">
+            <div class="form-group">
+              <label><i class="fa-solid fa-calendar-day"></i> Desde</label>
+              <input type="date" id="desde">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-calendar-day"></i> Hasta</label>
+              <input type="date" id="hasta">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-chart-bar"></i> Agrupar ventas por</label>
+              <select id="granularidad">
+                <option value="dia">Día</option>
+                <option value="semana">Semana</option>
+                <option value="mes">Mes</option>
+              </select>
+            </div>
+            <button class="btn-primary" id="btnCargar" style="background:white; color:#667eea; font-weight:600;">
+              <i class="fa-solid fa-sync"></i> Actualizar reportes
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOADING -->
+      <div class="loading" id="loading">
+        <i class="fa-solid fa-spinner"></i>
+        <p>Cargando reportes...</p>
+      </div>
+
+      <!-- KPIs -->
+      <section class="section">
+        <div class="kpi-grid">
+          <!-- KPI CAJA -->
+          <div class="kpi-card kpi-caja">
+            <div class="kpi-header">
+              <div class="kpi-icon">
+                <i class="fa-solid fa-cash-register"></i>
+              </div>
+              <div>
+                <div class="kpi-title">Dinero en Caja</div>
+              </div>
+            </div>
+            <div class="kpi-value">Q <span id="kpiCaja">0.00</span></div>
+            <div class="kpi-details">
+              <div class="kpi-detail-item">
+                <i class="fa-solid fa-arrow-down" style="color:#10b981"></i>
+                <span>Ingresos: <strong>Q <span id="kpiIng">0.00</span></strong></span>
+              </div>
+              <div class="kpi-detail-item">
+                <i class="fa-solid fa-arrow-up" style="color:#ef4444"></i>
+                <span>Egresos: <strong>Q <span id="kpiEgr">0.00</span></strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI CUENTAS POR COBRAR -->
+          <div class="kpi-card kpi-cxc">
+            <div class="kpi-header">
+              <div class="kpi-icon">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+              </div>
+              <div>
+                <div class="kpi-title">Cuentas por Cobrar</div>
+              </div>
+            </div>
+            <div class="kpi-value">Q <span id="kpiCxcSaldo">0.00</span></div>
+            <div class="kpi-details">
+              <div class="kpi-detail-item">
+                <span>Total: <strong>Q <span id="kpiCxcTotal">0.00</span></strong></span>
+              </div>
+              <div class="kpi-detail-item">
+                <span>Pagado: <strong>Q <span id="kpiCxcPagado">0.00</span></strong></span>
+              </div>
+              <div class="kpi-detail-item">
+                <span>Vencidas: <strong class="badge badge-danger"><span id="kpiCxcVenc">0</span></strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI UTILIDAD -->
+          <div class="kpi-card kpi-utilidad">
+            <div class="kpi-header">
+              <div class="kpi-icon">
+                <i class="fa-solid fa-chart-line"></i>
+              </div>
+              <div>
+                <div class="kpi-title">Utilidad Estimada</div>
+              </div>
+            </div>
+            <div class="kpi-value">Q <span id="kpiUtilidad">0.00</span></div>
+            <div class="kpi-details">
+              <div class="kpi-detail-item">
+                <span>Ventas: <strong>Q <span id="kpiVentas">0.00</span></strong></span>
+              </div>
+              <div class="kpi-detail-item">
+                <span>Costo: <strong>Q <span id="kpiCosto">0.00</span></strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VENTAS -->
+      <section class="section">
+        <div class="section-header">
+          <h3>
+            <i><i class="fa-solid fa-chart-column"></i></i>
+            <div>
+              <span>Ventas por Periodo</span>
+              <p style="font-size:0.875rem; color:#6b7280; font-weight:400; margin-top:0.25rem;">Totales agrupados según la granularidad seleccionada</p>
+            </div>
+          </h3>
+          <button class="export-btn" onclick="exportarTabla('tbVentas', 'ventas')">
+            <i class="fa-solid fa-file-excel"></i> Exportar
+          </button>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th><i class="fa-solid fa-calendar"></i> PERIODO</th>
+                  <th class="text-center"><i class="fa-solid fa-hashtag"></i> # VENTAS</th>
+                  <th class="text-right"><i class="fa-solid fa-coins"></i> TOTAL</th>
+                  <th class="text-right"><i class="fa-solid fa-money-bill"></i> CONTADO</th>
+                  <th class="text-right"><i class="fa-solid fa-credit-card"></i> CRÉDITO</th>
+                </tr>
+              </thead>
+              <tbody id="tbVentas">
+                <tr><td colspan="5" class="empty-row">Sin datos</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRODUCTOS -->
+      <section class="section">
+        <div class="section-header">
+          <h3>
+            <i><i class="fa-solid fa-box"></i></i>
+            <span>Productos</span>
+          </h3>
+        </div>
+
+        <div class="grid-2r">
+          <!-- MÁS VENDIDOS -->
+          <div class="card table-card highlight">
+            <div style="padding:1.5rem 1.5rem 0; display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="color:#10b981; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-trophy"></i> Top más vendidos
+              </h4>
+              <button class="export-btn" onclick="exportarTabla('tbMasVendidos', 'mas-vendidos')">
+                <i class="fa-solid fa-download"></i>
+              </button>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th><i class="fa-solid fa-box"></i> PRODUCTO</th>
+                    <th class="text-center"><i class="fa-solid fa-hashtag"></i> CANTIDAD</th>
+                    <th class="text-right"><i class="fa-solid fa-dollar-sign"></i> MONTO</th>
+                  </tr>
+                </thead>
+                <tbody id="tbMasVendidos">
+                  <tr><td colspan="3" class="empty-row">Sin datos</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- MENOS VENDIDOS -->
+          <div class="card table-card">
+            <div style="padding:1.5rem 1.5rem 0; display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="color:#ef4444; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-arrow-trend-down"></i> Menos vendidos
+              </h4>
+              <button class="export-btn" onclick="exportarTabla('tbMenosVendidos', 'menos-vendidos')">
+                <i class="fa-solid fa-download"></i>
+              </button>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th><i class="fa-solid fa-box"></i> PRODUCTO</th>
+                    <th class="text-center"><i class="fa-solid fa-hashtag"></i> CANTIDAD</th>
+                    <th class="text-right"><i class="fa-solid fa-dollar-sign"></i> MONTO</th>
+                  </tr>
+                </thead>
+                <tbody id="tbMenosVendidos">
+                  <tr><td colspan="3" class="empty-row">Sin datos</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CUENTAS -->
+      <section class="section">
+        <div class="section-header">
+          <h3>
+            <i><i class="fa-solid fa-file-invoice-dollar"></i></i>
+            <span>Detalle de Cuentas</span>
+          </h3>
+        </div>
+
+        <div class="grid-2r">
+          <!-- CUENTAS POR COBRAR -->
+          <div class="card table-card">
+            <div style="padding:1.5rem 1.5rem 0; display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-hand-holding-dollar" style="color:#f59e0b"></i> Cuentas por Cobrar
+              </h4>
+              <button class="export-btn" onclick="exportarTabla('tbCxc', 'cuentas-cobrar')">
+                <i class="fa-solid fa-download"></i>
+              </button>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="text-center">ID</th>
+                    <th><i class="fa-solid fa-user"></i> CLIENTE</th>
+                    <th><i class="fa-solid fa-file-lines"></i> DESCRIPCIÓN</th>
+                    <th class="text-right"><i class="fa-solid fa-dollar-sign"></i> SALDO</th>
+                    <th class="text-center"><i class="fa-solid fa-calendar"></i> VENCE</th>
+                    <th class="text-center"><i class="fa-solid fa-circle-check"></i> ESTADO</th>
+                  </tr>
+                </thead>
+                <tbody id="tbCxc">
+                  <tr><td colspan="6" class="empty-row">Sin datos</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- CUENTAS POR PAGAR -->
+          <div class="card table-card">
+            <div style="padding:1.5rem 1.5rem 0; display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-file-invoice" style="color:#ef4444"></i> Cuentas por Pagar
+              </h4>
+              <button class="export-btn" onclick="exportarTabla('tbCxp', 'cuentas-pagar')">
+                <i class="fa-solid fa-download"></i>
+              </button>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="text-center">ID</th>
+                    <th><i class="fa-solid fa-truck"></i> PROVEEDOR</th>
+                    <th><i class="fa-solid fa-file-lines"></i> DESCRIPCIÓN</th>
+                    <th class="text-right"><i class="fa-solid fa-dollar-sign"></i> SALDO</th>
+                    <th class="text-center"><i class="fa-solid fa-calendar"></i> VENCE</th>
+                    <th class="text-center"><i class="fa-solid fa-circle-check"></i> ESTADO</th>
+                  </tr>
+                </thead>
+                <tbody id="tbCxp">
+                  <tr><td colspan="6" class="empty-row">Sin datos</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INVENTARIO -->
+      <section class="section">
+        <div class="section-header">
+          <h3>
+            <i><i class="fa-solid fa-boxes-stacked"></i></i>
+            <div>
+              <span>Inventario en Bajo Stock</span>
+              <p style="font-size:0.875rem; color:#6b7280; font-weight:400; margin-top:0.25rem;">Productos que requieren reabastecimiento</p>
+            </div>
+          </h3>
+          <button class="export-btn" onclick="exportarTabla('tbStock', 'inventario-bajo-stock')">
+            <i class="fa-solid fa-file-excel"></i> Exportar
+          </button>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-center">ID</th>
+                  <th><i class="fa-solid fa-box"></i> PRODUCTO</th>
+                  <th class="text-center"><i class="fa-solid fa-layer-group"></i> STOCK ACTUAL</th>
+                  <th class="text-center"><i class="fa-solid fa-gauge"></i> MÍNIMO</th>
+                  <th class="text-center"><i class="fa-solid fa-triangle-exclamation"></i> FALTANTE</th>
+                </tr>
+              </thead>
+              <tbody id="tbStock">
+                <tr><td colspan="5" class="empty-row">Sin datos</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="admin-footer">
+      <span>&copy; <span id="year"></span> Distribuidora MyM</span>
+      <span class="footer-separator">|</span>
+      <span>Módulo de reportes</span>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+  // Sidebar toggle + año
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('sidebar-open'));
+  }
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => (Number(n||0)).toFixed(2);
+
+  const desde = $('desde');
+  const hasta = $('hasta');
+  const gran = $('granularidad');
+
+  const loading = $('loading');
+  const tbVentas = $('tbVentas');
+  const tbMas = $('tbMasVendidos');
+  const tbMenos = $('tbMenosVendidos');
+  const tbCxc = $('tbCxc');
+  const tbCxp = $('tbCxp');
+  const tbStock = $('tbStock');
+
+  const kpiIng = $('kpiIng');
+  const kpiEgr = $('kpiEgr');
+  const kpiCaja = $('kpiCaja');
+
+  const kpiCxcTotal = $('kpiCxcTotal');
+  const kpiCxcPagado = $('kpiCxcPagado');
+  const kpiCxcSaldo = $('kpiCxcSaldo');
+  const kpiCxcVenc = $('kpiCxcVenc');
+
+  const kpiVentas = $('kpiVentas');
+  const kpiCosto = $('kpiCosto');
+  const kpiUtilidad = $('kpiUtilidad');
+
+  function fillEmpty(tbody, cols) {
+    tbody.innerHTML = `<tr><td colspan="${cols}" class="empty-row"><i class="fa-solid fa-inbox"></i> Sin datos en este rango</td></tr>`;
+  }
+
+  function qParams() {
+    const p = new URLSearchParams();
+    if (desde.value) p.set('desde', desde.value);
+    if (hasta.value) p.set('hasta', hasta.value);
+    return p;
+  }
+
+  // Formatear fecha y hora
+  function formatDateTime(datetime) {
+    if (!datetime) return '—';
+    const d = new Date(datetime);
+    const fecha = d.toLocaleDateString('es-GT', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const hora = d.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' });
+    return `<div class="datetime-display"><span class="date">${fecha}</span><br><span class="time">${hora}</span></div>`;
+  }
+
+  // Formatear solo fecha
+  function formatDate(date) {
+    if (!date) return '—';
+    const d = new Date(date + 'T00:00:00');
+    return d.toLocaleDateString('es-GT', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  // Badge de estado
+  function getEstadoBadge(estado) {
+    const badges = {
+      'pendiente': '<span class="badge badge-warning">Pendiente</span>',
+      'parcial': '<span class="badge badge-info">Parcial</span>',
+      'pagada': '<span class="badge badge-success">Pagada</span>',
+      'anulada': '<span class="badge badge-secondary">Anulada</span>',
+      'registrada': '<span class="badge badge-info">Registrada</span>'
+    };
+    return badges[estado] || `<span class="badge badge-secondary">${estado}</span>`;
+  }
+
+  async function loadVentas() {
+    const p = qParams();
+    p.set('granularidad', gran.value);
+    const res = await fetch(`/api/reportes/ventas?${p.toString()}`);
+    const data = await res.json();
+
+    tbVentas.innerHTML = '';
+    if (!data || data.length === 0) return fillEmpty(tbVentas, 5);
+
+    for (const r of data) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${r.periodo}</strong></td>
+        <td class="text-center"><span class="badge badge-info">${r.cantidad_ventas}</span></td>
+        <td class="text-right"><strong>Q ${fmt(r.total_neto)}</strong></td>
+        <td class="text-right">Q ${fmt(r.total_contado)}</td>
+        <td class="text-right">Q ${fmt(r.total_credito)}</td>
+      `;
+      tbVentas.appendChild(tr);
+    }
+  }
+
+  async function loadProductos() {
+    const p = qParams();
+    p.set('limit', '10');
+
+    const [masRes, menosRes] = await Promise.all([
+      fetch(`/api/reportes/productos/mas-vendidos?${p.toString()}`),
+      fetch(`/api/reportes/productos/menos-vendidos?${p.toString()}`)
+    ]);
+
+    const mas = await masRes.json();
+    const menos = await menosRes.json();
+
+    tbMas.innerHTML = '';
+    if (!mas || mas.length === 0) fillEmpty(tbMas, 3);
+    else {
+      for (const r of mas) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${r.nombre_producto}</strong></td>
+          <td class="text-center"><span class="badge badge-success">${r.cantidad_vendida}</span></td>
+          <td class="text-right"><strong>Q ${fmt(r.monto_vendido)}</strong></td>
+        `;
+        tbMas.appendChild(tr);
+      }
+    }
+
+    tbMenos.innerHTML = '';
+    if (!menos || menos.length === 0) fillEmpty(tbMenos, 3);
+    else {
+      for (const r of menos) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${r.nombre_producto}</strong></td>
+          <td class="text-center"><span class="badge badge-warning">${r.cantidad_vendida}</span></td>
+          <td class="text-right">Q ${fmt(r.monto_vendido)}</td>
+        `;
+        tbMenos.appendChild(tr);
+      }
+    }
+  }
+
+  async function loadCuentas() {
+    const p = qParams();
+    const [cxcRes, cxpRes] = await Promise.all([
+      fetch(`/api/reportes/cxc?${p.toString()}`),
+      fetch(`/api/reportes/cxp?${p.toString()}`)
+    ]);
+
+    const cxc = await cxcRes.json();
+    const cxp = await cxpRes.json();
+
+    // KPI CxC
+    kpiCxcTotal.textContent = fmt(cxc?.resumen?.monto_total);
+    kpiCxcPagado.textContent = fmt(cxc?.resumen?.total_pagado);
+    kpiCxcSaldo.textContent = fmt(cxc?.resumen?.saldo_pendiente);
+    kpiCxcVenc.textContent = String(cxc?.resumen?.vencidas || 0);
+
+    tbCxc.innerHTML = '';
+    const cxcRows = cxc?.cuentas || [];
+    if (cxcRows.length === 0) fillEmpty(tbCxc, 6);
+    else {
+      for (const r of cxcRows.slice(0, 30)) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="text-center"><strong>#${r.id_cuenta_cobrar}</strong></td>
+          <td>
+            <strong>${r.nombre_cliente}</strong><br>
+            <small style="color:#9ca3af">${r.nit || 'C/F'}</small>
+          </td>
+          <td>
+            ${r.descripcion}
+            ${r.vencida ? '<br><span class="badge badge-danger"><i class="fa-solid fa-clock"></i> Vencida</span>' : ''}
+          </td>
+          <td class="text-right"><strong>Q ${fmt(r.saldo_pendiente)}</strong></td>
+          <td class="text-center">${formatDate(r.fecha_vencimiento)}</td>
+          <td class="text-center">${getEstadoBadge(r.estado)}</td>
+        `;
+        tbCxc.appendChild(tr);
+      }
+    }
+
+    tbCxp.innerHTML = '';
+    const cxpRows = cxp?.cuentas || [];
+    if (cxpRows.length === 0) fillEmpty(tbCxp, 6);
+    else {
+      for (const r of cxpRows.slice(0, 30)) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="text-center"><strong>#${r.id_cuenta_pagar}</strong></td>
+          <td><strong>${r.nombre_proveedor || 'Sin proveedor'}</strong></td>
+          <td>
+            ${r.descripcion}
+            ${r.vencida ? '<br><span class="badge badge-danger"><i class="fa-solid fa-clock"></i> Vencida</span>' : ''}
+          </td>
+          <td class="text-right"><strong>Q ${fmt(r.saldo_pendiente)}</strong></td>
+          <td class="text-center">${formatDate(r.fecha_vencimiento)}</td>
+          <td class="text-center">${getEstadoBadge(r.estado)}</td>
+        `;
+        tbCxp.appendChild(tr);
+      }
+    }
+  }
+
+  async function loadCaja() {
+    const p = qParams();
+    const res = await fetch(`/api/reportes/caja?${p.toString()}`);
+    const data = await res.json();
+    kpiIng.textContent = fmt(data.ingresos);
+    kpiEgr.textContent = fmt(data.egresos);
+    kpiCaja.textContent = fmt(data.saldo_en_caja);
+  }
+
+  async function loadInventario() {
+    const res = await fetch(`/api/reportes/inventario/bajo-stock`);
+    const data = await res.json();
+    tbStock.innerHTML = '';
+    if (!data || data.length === 0) return fillEmpty(tbStock, 5);
+
+    for (const r of data) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-center"><strong>#${r.id_producto}</strong></td>
+        <td><strong>${r.nombre_producto}</strong></td>
+        <td class="text-center"><span class="badge badge-danger">${r.stock_actual}</span></td>
+        <td class="text-center"><span class="badge badge-warning">${r.stock_minimo}</span></td>
+        <td class="text-center"><strong class="stat-trend down"><i class="fa-solid fa-arrow-down"></i> ${fmt(r.faltante)}</strong></td>
+      `;
+      tbStock.appendChild(tr);
+    }
+  }
+
+  async function loadUtilidad() {
+    const p = qParams();
+    const res = await fetch(`/api/reportes/utilidad?${p.toString()}`);
+    const data = await res.json();
+    kpiVentas.textContent = fmt(data.ventas);
+    kpiCosto.textContent = fmt(data.costo_estimado);
+    kpiUtilidad.textContent = fmt(data.utilidad_estimada);
+  }
+
+  async function cargarTodo() {
+    try {
+      loading.classList.add('active');
+      await Promise.all([
+        loadCaja(),
+        loadUtilidad(),
+        loadVentas(),
+        loadProductos(),
+        loadCuentas(),
+        loadInventario()
+      ]);
+    } catch (e) {
+      console.error(e);
+      alert('Error cargando reportes. Revisa la consola para más detalles.');
+    } finally {
+      loading.classList.remove('active');
+    }
+  }
+
+  // Función para exportar tablas a CSV
+  function exportarTabla(tbodyId, nombreArchivo) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    
+    const table = tbody.closest('table');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    
+    let csv = '';
+    rows.forEach(row => {
+      const cells = Array.from(row.querySelectorAll('th, td'));
+      const rowData = cells.map(cell => {
+        let text = cell.textContent.trim();
+        text = text.replace(/"/g, '""'); // Escapar comillas
+        return `"${text}"`;
+      }).join(',');
+      csv += rowData + '\n';
+    });
+    
+    // Descargar archivo
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${nombreArchivo}_${new Date().toISOString().slice(0,10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  document.getElementById('btnCargar').addEventListener('click', cargarTodo);
+
+  // defaults: últimos 30 días
+  (function init(){
+    const hoy = new Date();
+    const h = new Date(hoy);
+    const d = new Date(hoy);
+    d.setDate(d.getDate() - 30);
+
+    const toISO = (x) => x.toISOString().slice(0,10);
+    desde.value = toISO(d);
+    hasta.value = toISO(h);
+
+    cargarTodo();
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuentas por cobrar | Distribuidora MyM</title>
+
+  <link rel="stylesheet" href="css/stylebackend.css">
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 1.1rem;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.4);
+      max-width: 900px;
+      width: 96%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 0.9rem 1.4rem;
+      border-bottom: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body {
+      padding: 1rem 1.4rem 1.2rem;
+      overflow-y: auto;
+    }
+    .modal-footer {
+      padding: 0.8rem 1.4rem 1rem;
+      border-top: 1px solid #e5e5e5;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .modal-close {
+      border: none;
+      background: transparent;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+    @media (max-width: 800px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+    .mini-label {
+      font-size: 0.8rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <span class="sidebar-logo-icon">MyM</span>
+        <div class="sidebar-logo-text">
+          <h1>Distribuidora MyM</h1>
+          <p>Panel administrativo</p>
+        </div>
+      </div>
+    </div>
+
+        <nav class="sidebar-nav">
+      <ul>
+        <li>
+          <a href="adminv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+                <li>
+          <a href="vendedorv.html">
+            <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span>
+            <span>Ventas</span>
+          </a>
+        </li>
+
+         <li>
+          <a href="detalle.venta.html">
+            <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
+            <span>Detalle de ventas</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="comprasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box"></i></span>
+            <span>Compras</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="clientesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+            <span>Clientes / Créditos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="inventarioav.html">
+            <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <span>Inventario</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="productosv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hotdog"></i></span>
+            <span>Productos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="categoriasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
+            <span>Categorías</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="proveedoresv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-field"></i></span>
+            <span>Proveedores</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="reportesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+            <span>Reportes</span>
+          </a>
+        </li>
+
+        <li class="active">
+          <a href="ctasporcobrarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span>Ctas. por cobrar</span>
+          </a>
+        </li>
+        <li>
+          <a href="ctaspagarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span>Ctas. por pagar</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="rusuario.html">
+            <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+            <span>Usuarios</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <small>Distribuidora MyM</small>
+      <small class="muted">Control de cuentas por cobrar</small>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-toggle" id="sidebarToggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="topbar-title">
+        <h2>Cuentas por cobrar</h2>
+        <p>Controla los créditos otorgados a clientes y registra sus pagos.</p>
+      </div>
+
+      <div class="topbar-user">
+        <div class="user-info">
+          <span class="user-name">Usuario: Admin</span>
+          <span class="user-role">Distribuidora MyM</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="content">
+
+      <section class="section">
+        <div class="section-header small">
+          <h3>Listado de cuentas por cobrar</h3>
+          <p>Estas cuentas se generan automáticamente desde ventas a crédito.</p>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-wrapper">
+            <table id="tablaCuentasCobrar">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Monto</th>
+                <th>Pagado</th>
+                <th>Saldo</th>
+                <th>Registro</th>
+                <th>Vencimiento</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td colspan="9" class="empty-row">
+                  No hay cuentas por cobrar registradas todavía.
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="admin-footer">
+      <span>&copy; <span id="year"></span> Distribuidora MyM</span>
+      <span class="footer-separator">|</span>
+      <span>Módulo de cuentas por cobrar</span>
+    </footer>
+
+  </div>
+</div>
+
+<!-- MODAL DETALLE / PAGOS -->
+<div class="modal-backdrop" id="modalDetalleCxC">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Detalle de cuenta por cobrar</h3>
+      <button type="button" class="modal-close" id="btnCerrarModalDetalleCxC">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="detalleCxCHeader" style="margin-bottom:0.8rem; font-size:0.9rem;"></div>
+
+      <hr style="margin:0.8rem 0; border:none; border-top:1px dashed #e0e0e0;">
+
+      <h4 style="font-size:1rem; margin-bottom:0.5rem;">Registrar pago</h4>
+      <form id="formPagoCxC" class="user-form">
+        <input type="hidden" id="id_cxc_pago">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="fecha_pago_cxc">Fecha de pago</label>
+            <input type="date" id="fecha_pago_cxc" required>
+          </div>
+          <div class="form-group">
+            <label for="monto_pago_cxc">Monto pagado</label>
+            <input type="number" id="monto_pago_cxc" min="0" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="metodo_pago_cxc">Método de pago</label>
+            <select id="metodo_pago_cxc">
+              <option value="efectivo">Efectivo</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="deposito">Depósito</option>
+              <option value="cheque">Cheque</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="referencia_pago_cxc">Referencia</label>
+            <input type="text" id="referencia_pago_cxc" placeholder="No. boleta, etc.">
+          </div>
+          <div class="form-group" style="grid-column:1 / -1;">
+            <label for="notas_pago_cxc">Notas de pago</label>
+            <textarea id="notas_pago_cxc" rows="2"
+                      style="resize:vertical; padding:0.55rem 0.7rem; border-radius:0.5rem; border:1px solid #d1d1d1; font-size:0.9rem; background:#fafafa; outline:none;"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" id="btnCerrarModalDetalleCxC2">
+        Cerrar
+      </button>
+      <button type="button" class="btn-primary" id="btnGuardarPagoCxC">
+        <i class="fa-solid fa-money-bill-wave"></i>&nbsp;Guardar pago
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== Sidebar + año =====
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebar       = document.getElementById('sidebar');
+  const yearSpan      = document.getElementById('year');
+
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('sidebar-open');
+    });
+  }
+  if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
+  }
+
+  // ===== FORMATO FECHA/HORA =====
+  function formatearFechaHoraGT(valor) {
+    if (!valor) return '';
+    let iso = valor;
+    if (typeof valor === 'string' && valor.length === 19 && valor[10] === ' ') {
+      iso = valor.replace(' ', 'T');
+    }
+    const d = new Date(iso);
+    const f = new Intl.DateTimeFormat('es-GT', {
+      timeZone: 'America/Guatemala',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+    const parts = f.formatToParts(d);
+    let day='00', month='00', year='0000';
+    let hour='00', minute='00', second='00', dayPeriod='';
+    for (const p of parts) {
+      switch (p.type) {
+        case 'day': day = p.value; break;
+        case 'month': month = p.value; break;
+        case 'year': year = p.value; break;
+        case 'hour': hour = p.value; break;
+        case 'minute': minute = p.value; break;
+        case 'second': second = p.value; break;
+        case 'dayPeriod': dayPeriod = p.value; break;
+      }
+    }
+    let ampm = dayPeriod.toUpperCase().replace(/\./g,'').replace(/\s+/g,'');
+    if (ampm !== 'AM' && ampm !== 'PM') {
+      ampm = dayPeriod.toUpperCase().includes('P') ? 'PM' : 'AM';
+    }
+    return `${day}/${month}/${year}, ${hour}:${minute}:${second} ${ampm}`;
+  }
+
+  function formatearFechaGT(valor) {
+    if (!valor) return '';
+    const d = new Date(valor);
+    const f = new Intl.DateTimeFormat('es-GT', {
+      timeZone: 'America/Guatemala',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    return f.format(d);
+  }
+
+  function formatearMoneda(q) {
+    return (Number(q) || 0).toFixed(2);
+  }
+
+  // ===== API =====
+  const API_CXC = '/api/cuentas-cobrar';
+
+  // ===== DOM =====
+  const tablaCxcBody           = document.querySelector('#tablaCuentasCobrar tbody');
+  const modalDetalleCxC        = document.getElementById('modalDetalleCxC');
+  const btnCerrarModalDetalleCxC  = document.getElementById('btnCerrarModalDetalleCxC');
+  const btnCerrarModalDetalleCxC2 = document.getElementById('btnCerrarModalDetalleCxC2');
+  const detalleCxCHeader       = document.getElementById('detalleCxCHeader');
+
+  const formPagoCxC            = document.getElementById('formPagoCxC');
+  const idCxcPagoHidden        = document.getElementById('id_cxc_pago');
+  const fechaPagoCxCInput      = document.getElementById('fecha_pago_cxc');
+  const montoPagoCxCInput      = document.getElementById('monto_pago_cxc');
+  const metodoPagoCxCSelect    = document.getElementById('metodo_pago_cxc');
+  const referenciaPagoCxCInput = document.getElementById('referencia_pago_cxc');
+  const notasPagoCxCInput      = document.getElementById('notas_pago_cxc');
+  const btnGuardarPagoCxC      = document.getElementById('btnGuardarPagoCxC');
+
+  // ===== MODAL =====
+  function abrirModalDetalleCxC() {
+    modalDetalleCxC.classList.add('open');
+  }
+  function cerrarModalDetalleCxC() {
+    modalDetalleCxC.classList.remove('open');
+    formPagoCxC.reset();
+  }
+
+  btnCerrarModalDetalleCxC.addEventListener('click', cerrarModalDetalleCxC);
+  btnCerrarModalDetalleCxC2.addEventListener('click', cerrarModalDetalleCxC);
+  modalDetalleCxC.addEventListener('click', (e) => {
+    if (e.target === modalDetalleCxC) cerrarModalDetalleCxC();
+  });
+
+  // ===== CARGAR CUENTAS POR COBRAR =====
+  async function cargarCuentasCobrar() {
+    try {
+      const res = await fetch(API_CXC);
+      if (!res.ok) throw new Error('Error al listar cuentas por cobrar');
+      const cuentas = await res.json();
+
+      tablaCxcBody.innerHTML = '';
+
+      if (!cuentas || cuentas.length === 0) {
+        tablaCxcBody.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty-row">
+              No hay cuentas por cobrar registradas todavía.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      cuentas.forEach(c => {
+        const fechaReg = c.creado_en
+          ? formatearFechaHoraGT(c.creado_en)
+          : (c.fecha_registro ? formatearFechaGT(c.fecha_registro) : '');
+        const fechaVen = c.fecha_vencimiento ? formatearFechaGT(c.fecha_vencimiento) : '—';
+
+        const tr = document.createElement('tr');
+        tr.dataset.id = c.id_cuenta_cobrar;
+        tr.innerHTML = `
+          <td>${c.id_cuenta_cobrar}</td>
+          <td>
+            <strong>${c.nombre_cliente || ''}</strong><br>
+            <span style="font-size:0.8rem; color:#666;">
+              ${c.descripcion || ''} 
+            </span>
+          </td>
+          <td>Q ${formatearMoneda(c.monto_total)}</td>
+          <td>Q ${formatearMoneda(c.total_pagado)}</td>
+          <td>Q ${formatearMoneda(c.saldo_pendiente)}</td>
+          <td>${fechaReg}</td>
+          <td>${fechaVen}</td>
+          <td>
+            <span class="badge ${
+              c.estado === 'pagada' ? 'badge-success' :
+              c.estado === 'anulada' ? 'badge-danger' :
+              c.estado === 'parcial' ? 'badge-warning' : 'badge-secondary'
+            }">${c.estado}</span>
+          </td>
+          <td class="tabla-acciones">
+            <button type="button" class="btn-icon btn-ver-cxc" title="Ver / registrar pago">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </td>
+        `;
+        tablaCxcBody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Error al cargar las cuentas por cobrar.');
+    }
+  }
+
+  // ===== ABRIR DETALLE / PREPARAR PAGO =====
+  tablaCxcBody.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-ver-cxc');
+    if (!btn) return;
+
+    const fila = btn.closest('tr');
+    const id   = fila.dataset.id;
+    if (!id) return;
+
+    const cliente   = fila.children[1].querySelector('strong').innerText;
+    const descLinea = fila.children[1].querySelector('span').innerText;
+    const monto     = fila.children[2].innerText;
+    const pagado    = fila.children[3].innerText;
+    const saldo     = fila.children[4].innerText;
+    const fechaReg  = fila.children[5].innerText;
+    const fechaVen  = fila.children[6].innerText;
+    const estado    = fila.children[7].innerText.trim();
+
+    detalleCxCHeader.innerHTML = `
+      <div><strong>Cuenta #${id}</strong> (${estado})</div>
+      <div>Cliente: <strong>${cliente}</strong></div>
+      <div>${descLinea}</div>
+      <div>Monto: ${monto} · Pagado: ${pagado} · Saldo: ${saldo}</div>
+      <div>Registro: ${fechaReg} · Vencimiento: ${fechaVen}</div>
+    `;
+
+    const hoy = new Date().toISOString().slice(0,10);
+    fechaPagoCxCInput.value = hoy;
+    idCxcPagoHidden.value = id;
+
+    abrirModalDetalleCxC();
+  });
+
+  // ===== GUARDAR PAGO CxC =====
+  btnGuardarPagoCxC.addEventListener('click', async () => {
+    const idCuenta  = idCxcPagoHidden.value;
+    const fechaPago = fechaPagoCxCInput.value;
+    const monto     = parseFloat(montoPagoCxCInput.value || '0');
+    const metodo    = metodoPagoCxCSelect.value;
+    const ref       = referenciaPagoCxCInput.value.trim() || null;
+    const notas     = notasPagoCxCInput.value.trim() || null;
+
+    if (!idCuenta) {
+      alert('No hay cuenta seleccionada.');
+      return;
+    }
+    if (!fechaPago) {
+      alert('La fecha de pago es obligatoria.');
+      return;
+    }
+    if (!monto || monto <= 0) {
+      alert('El monto del pago debe ser mayor a 0.');
+      return;
+    }
+
+    const payload = {
+      fecha_pago: fechaPago,
+      monto_pagado: monto,
+      metodo_pago: metodo,
+      referencia: ref,
+      notas
+    };
+
+    try {
+      const res = await fetch(`${API_CXC}/${idCuenta}/abonos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(data.message || 'Error al registrar el pago.');
+        return;
+      }
+
+      alert('Pago registrado correctamente.');
+      cerrarModalDetalleCxC();
+      await cargarCuentasCobrar();
+    } catch (err) {
+      console.error(err);
+      alert('Ocurrió un error al registrar el pago.');
+    }
+  });
+
+  // ===== INIT =====
+  (async function initCxC() {
+    const hoy = new Date().toISOString().slice(0,10);
+    fechaPagoCxCInput.value = hoy;
+    await cargarCuentasCobrar();
+  })();
+</script>
+
+</body>
+</html>

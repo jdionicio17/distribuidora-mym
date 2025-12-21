@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de productos | Distribuidora MyM</title>
+
+  <!-- CSS del panel -->
+  <link rel="stylesheet" href="css/stylebackend.css" />
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+
+  <style>
+    /* =========================
+       FIX: evitar recortes del autocomplete
+       ========================= */
+    .card, .user-card, .section, .content, .main-area { overflow: visible !important; }
+    .form-grid-2, .user-form { overflow: visible !important; }
+
+    /* =========================
+       AUTOCOMPLETE (tipo Google)
+       ========================= */
+    .autocomplete-wrap{
+      position: relative;
+      overflow: visible !important;
+    }
+
+    /* Panel flotante */
+    .autocomplete-panel{
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 100%;
+      z-index: 99999;
+
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,.10);
+      border-radius: 14px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.16);
+      overflow: hidden;
+
+      display: none;
+      box-sizing: border-box;
+    }
+
+    .autocomplete-panel.open{
+      display: block;
+    }
+
+    .autocomplete-header{
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #666;
+      background: #fafafa;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .autocomplete-list{
+      max-height: 320px;
+      overflow-y: auto;
+      overflow-x: hidden; /* ✅ sin scroll horizontal */
+    }
+
+    .ac-item{
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+      background: #fff;
+    }
+    .ac-item:last-child{ border-bottom: none; }
+
+    .ac-item:hover,
+    .ac-item.active{
+      background: rgba(176, 105, 53, .10);
+    }
+
+    .ac-left{
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .ac-title{
+      font-weight: 700;
+      font-size: 14px;
+      color: #1f1f1f;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ac-sub{
+      margin-top: 5px;
+      font-size: 12px;
+      color: #6b6b6b;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge{
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.10);
+      background: #fff;
+      color: #333;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge.soft{
+      background: rgba(0,0,0,.04);
+    }
+
+    .ac-right{
+      flex: 0 0 auto;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 42%;
+    }
+
+    .stock{
+      font-size: 12px;
+      color: #333;
+      white-space: nowrap;
+    }
+
+    .price-row{
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .price{
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(176, 105, 53, .25);
+      background: rgba(176, 105, 53, .08);
+      color: #7a3e1c;
+      white-space: nowrap;
+    }
+
+    .ac-empty{
+      padding: 14px 12px;
+      font-size: 13px;
+      color: #666;
+      background: #fff;
+    }
+
+    .hint-keys{
+      font-size: 11px;
+      color: #777;
+      white-space: nowrap;
+    }
+
+    /* Responsive: en pantallas pequeñas, que el panel no se deforme */
+    @media (max-width: 640px){
+      .ac-right{ display:none; } /* opcional: si se ve apretado, ocultamos la columna derecha */
+      .ac-title{ font-size: 13px; }
+    }
+  </style>
+</head>
+
+<body class="admin-body">
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span class="sidebar-logo-icon">MyM</span>
+          <div class="sidebar-logo-text">
+            <h1>Distribuidora MyM</h1>
+            <p>Panel administrativo</p>
+          </div>
+        </div>
+      </div>
+
+          <nav class="sidebar-nav">
+      <ul>
+        <li >
+          <a href="adminv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+                <li>
+          <a href="vendedorv.html">
+            <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span>
+            <span>Ventas</span>
+          </a>
+        </li>
+
+         <li>
+          <a href="detalle.venta.html">
+            <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
+            <span>Detalle de ventas</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="comprasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box"></i></span>
+            <span>Compras</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="clientesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+            <span>Clientes / Créditos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="inventarioav.html">
+            <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <span>Inventario</span>
+          </a>
+        </li>
+
+        <li class="active">
+          <a href="productosv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hotdog"></i></span>
+            <span>Productos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="categoriasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
+            <span>Categorías</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="proveedoresv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-field"></i></span>
+            <span>Proveedores</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="reportesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+            <span>Reportes</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="ctasporcobrarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span>Ctas. por cobrar</span>
+          </a>
+        </li>
+        <li>
+          <a href="ctaspagarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span>Ctas. por pagar</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="rusuario.html">
+            <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+            <span>Usuarios</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+      <div class="sidebar-footer">
+        <small>Distribuidora MyM</small>
+        <small class="muted">Gestión de productos e inventario</small>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="main-area">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <button class="menu-toggle" id="sidebarToggle">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="topbar-title">
+          <h2>Gestión de productos</h2>
+          <p>Registrar, actualizar y administrar productos del catálogo.</p>
+        </div>
+
+        <div class="topbar-user">
+          <div class="user-info">
+            <span class="user-name">Usuario: Admin</span>
+            <span class="user-role">Distribuidora MyM</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO -->
+      <main class="content">
+
+        <!-- BUSCADOR DE PRODUCTOS -->
+        <section class="section">
+          <div class="section-header">
+            <h3>Buscar producto</h3>
+            <p>Busca por código de barras, código interno o nombre para editar o eliminar.</p>
+          </div>
+
+          <div class="card user-card" style="max-width: 700px; overflow: visible;">
+            <form class="user-form" id="buscadorProductoForm" autocomplete="off">
+              <div class="form-grid-2" style="align-items: flex-end; overflow: visible;">
+                <div class="form-group autocomplete-wrap">
+                  <label for="terminoBusqueda">Código / Nombre del producto</label>
+
+                  <input type="text"
+                         id="terminoBusqueda"
+                         name="terminoBusqueda"
+                         placeholder="Ej. 7701234567890 o 'Salchicha Toledo'" />
+
+                  <!-- PANEL AUTOCOMPLETE -->
+                  <div class="autocomplete-panel" id="acPanel" aria-hidden="true">
+                    <div class="autocomplete-header">
+                      <span>Resultados</span>
+                      <span class="hint-keys">↑ ↓ Enter • Esc</span>
+                    </div>
+                    <div class="autocomplete-list" id="acList"></div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <button type="submit" class="btn-primary" style="margin-top: 0.3rem; width: 100%;">
+                    <i class="fa-solid fa-magnifying-glass"></i>&nbsp;Buscar
+                  </button>
+                </div>
+              </div>
+
+              <p id="textoResultadoBusqueda"
+                 style="font-size:0.8rem; color:#666; margin-top:0.4rem;">
+                Escribe y selecciona un producto de la lista. También puedes presionar “Buscar” para búsqueda exacta.
+              </p>
+            </form>
+          </div>
+        </section>
+
+        <!-- FORMULARIO: AGREGAR / ACTUALIZAR / ELIMINAR PRODUCTO -->
+        <section class="section">
+          <div class="section-header">
+            <h3>Datos del producto</h3>
+            <p>Completa los datos para registrar un nuevo producto o actualizar uno existente.</p>
+          </div>
+
+          <div class="card user-card" style="overflow: visible;">
+            <form class="user-form" id="productoForm">
+              <input type="hidden" id="id_producto" name="id_producto" />
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="codigo_barra">Código de barras</label>
+                  <input type="text" id="codigo_barra" name="codigo_barra" placeholder="Escanear o escribir código" />
+                </div>
+
+                <div class="form-group">
+                  <label for="codigo_interno">Código interno</label>
+                  <input type="text" id="codigo_interno" name="codigo_interno" placeholder="Código interno de la tienda" />
+                </div>
+
+                <div class="form-group">
+                  <label for="nombre_producto">Nombre del producto</label>
+                  <input type="text" id="nombre_producto" name="nombre_producto" placeholder="Ej. Salchicha especial 1 lb" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="id_categoria">Categoría</label>
+                  <select id="id_categoria" name="id_categoria" required>
+                    <option value="">Seleccione una categoría</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="id_proveedor">Proveedor</label>
+                  <select id="id_proveedor" name="id_proveedor">
+                    <option value="">Sin proveedor asignado</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="unidad_medida">Unidad de medida</label>
+                  <input type="text" id="unidad_medida" name="unidad_medida" placeholder="Ej. unidad, caja, saco, litro" value="unidad" />
+                </div>
+
+                <div class="form-group">
+                  <label for="estado">Estado</label>
+                  <select id="estado" name="estado">
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="stock_actual">Stock actual</label>
+                  <input type="number" step="0.01" min="0" id="stock_actual" name="stock_actual" placeholder="0.00" value="0" />
+                </div>
+
+                <div class="form-group">
+                  <label for="stock_minimo">Stock mínimo</label>
+                  <input type="number" step="0.01" min="0" id="stock_minimo" name="stock_minimo" placeholder="0.00" value="0" />
+                </div>
+
+                <div class="form-group">
+                  <label for="precio_compra">Precio de compra</label>
+                  <input type="number" step="0.01" min="0" id="precio_compra" name="precio_compra" placeholder="Q 0.00" value="0" />
+                </div>
+
+                <div class="form-group">
+                  <label for="precio_venta_cliente">Precio de venta (cliente)</label>
+                  <input type="number" step="0.01" min="0" id="precio_venta_cliente" name="precio_venta_cliente" placeholder="Q 0.00" value="0" />
+                </div>
+
+                <div class="form-group">
+                  <label for="precio_venta_camion">Precio de camión</label>
+                  <input type="number" step="0.01" min="0" id="precio_venta_camion" name="precio_venta_camion" placeholder="Q 0.00" value="0" />
+                </div>
+
+                <div class="form-group">
+                  <label for="precio_venta_preventa">Precio de preventa (mayorista)</label>
+                  <input type="number" step="0.01" min="0" id="precio_venta_preventa" name="precio_venta_preventa" placeholder="Q 0.00" value="0" />
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label for="descripcion">Descripción / presentación</label>
+                  <input type="text" id="descripcion" name="descripcion" placeholder="Ej. Paquete de 10 unidades, refrigerado, etc." />
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label for="notas">Notas internas</label>
+                  <textarea id="notas" name="notas" rows="3"
+                            style="resize: vertical; padding: 0.55rem 0.7rem; border-radius: 0.5rem; border: 1px solid #d1d1d1; font-size: 0.9rem; background:#fafafa; outline:none;"></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions" style="justify-content: space-between;">
+                <div>
+                  <button type="button" class="btn-secondary" id="btnEliminarProducto">
+                    <i class="fa-solid fa-trash-can"></i>&nbsp;Eliminar
+                  </button>
+                </div>
+                <div>
+                  <button type="reset" class="btn-secondary" id="btnLimpiarProducto">
+                    <i class="fa-solid fa-rotate-left"></i>&nbsp;Limpiar
+                  </button>
+                  <button type="submit" class="btn-primary" id="btnGuardarProducto">
+                    <i class="fa-solid fa-floppy-disk"></i>&nbsp;Guardar producto
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+      </main>
+
+      <footer class="admin-footer">
+        <span>&copy; <span id="year"></span> Distribuidora MyM</span>
+        <span class="footer-separator">|</span>
+        <span>Módulo de productos</span>
+      </footer>
+
+    </div>
+  </div>
+
+  <script>
+    // Sidebar responsive + año
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const yearSpan = document.getElementById('year');
+
+    if (sidebarToggle && sidebar) {
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('sidebar-open');
+      });
+    }
+    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+
+    // =============================
+    // LÓGICA FRONTEND CON BACKEND
+    // =============================
+    const buscadorProductoForm = document.getElementById('buscadorProductoForm');
+    const productoForm        = document.getElementById('productoForm');
+    const btnGuardarProducto  = document.getElementById('btnGuardarProducto');
+    const btnLimpiarProducto  = document.getElementById('btnLimpiarProducto');
+    const btnEliminarProducto = document.getElementById('btnEliminarProducto');
+
+    const selectCategoria = document.getElementById('id_categoria');
+    const selectProveedor = document.getElementById('id_proveedor');
+
+    const API_PRODUCTOS   = '/api/productos';
+    const API_CATEGORIAS  = '/api/categorias';
+    const API_PROVEEDORES = '/api/proveedores';
+
+    // ===== Autocomplete refs
+    const inputBusqueda = document.getElementById('terminoBusqueda');
+    const acPanel = document.getElementById('acPanel');
+    const acList  = document.getElementById('acList');
+
+    let catalogoProductos = [];   // cache
+    let acOpen = false;
+    let acActiveIndex = -1;
+    let acItems = [];
+
+    function moneyQ(v){
+      const n = Number(v || 0);
+      return 'Q ' + n.toFixed(2);
+    }
+
+    function normalizeText(s){
+      return String(s || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    }
+
+    function openAC(){
+      acPanel.classList.add('open');
+      acPanel.setAttribute('aria-hidden','false');
+      acOpen = true;
+    }
+
+    function closeAC(){
+      acPanel.classList.remove('open');
+      acPanel.setAttribute('aria-hidden','true');
+      acOpen = false;
+      acActiveIndex = -1;
+      acItems = [];
+      acList.innerHTML = '';
+    }
+
+    function setActive(index){
+      acActiveIndex = index;
+      const nodes = acList.querySelectorAll('.ac-item');
+      nodes.forEach((n,i)=> n.classList.toggle('active', i===index));
+
+      const activeNode = nodes[index];
+      if(activeNode){
+        const container = acList;
+        const top = activeNode.offsetTop;
+        const bottom = top + activeNode.offsetHeight;
+        if(top < container.scrollTop) container.scrollTop = Math.max(0, top - 10);
+        if(bottom > container.scrollTop + container.clientHeight){
+          container.scrollTop = bottom - container.clientHeight + 10;
+        }
+      }
+    }
+
+    function renderAC(items){
+      acList.innerHTML = '';
+      acItems = items;
+
+      if(!items.length){
+        acList.innerHTML = `<div class="ac-empty">Sin resultados. Prueba con otro nombre o código.</div>`;
+        openAC();
+        return;
+      }
+
+      const frag = document.createDocumentFragment();
+
+      items.forEach((p, idx)=>{
+        const div = document.createElement('div');
+        div.className = 'ac-item';
+        div.setAttribute('role','option');
+
+        const nombre = p.nombre_producto || 'Producto';
+        const cb = p.codigo_barra || '';
+        const ci = p.codigo_interno || '';
+        const stock = (p.stock_actual ?? p.existencia ?? 0);
+
+        const pc = p.precio_venta_camion ?? p.precio_camion ?? null;
+        const pp = p.precio_venta_preventa ?? p.precio_preventa ?? null;
+        const pv = p.precio_venta_cliente ?? null;
+
+        const codText = [
+          cb ? `Barras: ${cb}` : null,
+          ci ? `Interno: ${ci}` : null
+        ].filter(Boolean).join(' • ');
+
+        div.innerHTML = `
+          <div class="ac-left">
+            <div class="ac-title">${nombre}</div>
+            <div class="ac-sub">
+              ${codText ? `<span class="badge soft">${codText}</span>` : `<span class="badge soft">Sin códigos</span>`}
+              ${p.nombre_categoria ? `<span class="badge">${p.nombre_categoria}</span>` : ``}
+            </div>
+          </div>
+          <div class="ac-right">
+            <div class="stock"><strong>Stock:</strong> ${Number(stock)}</div>
+            <div class="price-row">
+              ${pv != null ? `<span class="price">Cliente: ${moneyQ(pv)}</span>` : ``}
+              ${pc != null ? `<span class="price">Camión: ${moneyQ(pc)}</span>` : ``}
+              ${pp != null ? `<span class="price">Preventa: ${moneyQ(pp)}</span>` : ``}
+            </div>
+          </div>
+        `;
+
+        div.addEventListener('mousedown', (ev)=>{
+          ev.preventDefault();
+          seleccionarProductoDesdeAC(idx);
+        });
+
+        frag.appendChild(div);
+      });
+
+      acList.appendChild(frag);
+      openAC();
+      setActive(0);
+    }
+
+    async function ensureCatalogoCargado(){
+      if(catalogoProductos.length) return;
+      const res = await fetch(`${API_PRODUCTOS}?ordenar=nombre_asc`);
+      if(!res.ok) throw new Error('No se pudo cargar el catálogo de productos.');
+      const data = await res.json();
+      catalogoProductos = Array.isArray(data) ? data : [];
+    }
+
+    function filtrarProductos(term){
+      const raw = String(term || '').trim();
+      const t = normalizeText(raw);
+      if(!t) return [];
+
+      const isNumericLike = /^[0-9-]+$/.test(raw);
+
+      return catalogoProductos.map(p=>{
+        const nombre = normalizeText(p.nombre_producto);
+        const cb = normalizeText(p.codigo_barra);
+        const ci = normalizeText(p.codigo_interno);
+
+        let score = 0;
+        if(cb && cb.includes(t)) score += (cb === t ? 120 : 80);
+        if(ci && ci.includes(t)) score += (ci === t ? 110 : 70);
+        if(nombre && nombre.includes(t)) score += (nombre.startsWith(t) ? 60 : 45);
+
+        if(isNumericLike){
+          score += (cb && cb.includes(t)) ? 30 : 0;
+          score += (ci && ci.includes(t)) ? 20 : 0;
+        }
+
+        const stock = Number(p.stock_actual ?? p.existencia ?? 0);
+        if(stock <= 0) score -= 3;
+
+        return { p, score };
+      })
+      .filter(x => x.score > 0)
+      .sort((a,b)=> b.score - a.score)
+      .slice(0, 10)
+      .map(x => x.p);
+    }
+
+    async function seleccionarProductoDesdeAC(idx){
+      const item = acItems[idx];
+      if(!item) return;
+
+      inputBusqueda.value = item.nombre_producto || '';
+      closeAC();
+
+      try{
+        const res = await fetch(`${API_PRODUCTOS}/${item.id_producto}`);
+        const data = await res.json().catch(()=> ({}));
+        if(!res.ok) throw new Error(data.message || 'No se pudo cargar el producto.');
+        llenarFormularioProducto(data);
+      }catch(err){
+        console.error(err);
+        alert('Error al cargar el producto seleccionado.');
+      }
+    }
+
+    // Eventos autocomplete
+    inputBusqueda.addEventListener('focus', async ()=>{
+      try{
+        await ensureCatalogoCargado();
+        const items = filtrarProductos(inputBusqueda.value);
+        if(items.length) renderAC(items);
+      }catch(err){
+        console.error(err);
+      }
+    });
+
+    inputBusqueda.addEventListener('input', async ()=>{
+      try{
+        await ensureCatalogoCargado();
+        const items = filtrarProductos(inputBusqueda.value);
+        renderAC(items);
+      }catch(err){
+        console.error(err);
+        closeAC();
+      }
+    });
+
+    inputBusqueda.addEventListener('keydown', (e)=>{
+      if(!acOpen) return;
+
+      if(e.key === 'ArrowDown'){
+        e.preventDefault();
+        const next = Math.min(acItems.length - 1, (acActiveIndex < 0 ? 0 : acActiveIndex + 1));
+        setActive(next);
+      }else if(e.key === 'ArrowUp'){
+        e.preventDefault();
+        const prev = Math.max(0, (acActiveIndex < 0 ? 0 : acActiveIndex - 1));
+        setActive(prev);
+      }else if(e.key === 'Enter'){
+        if(acItems.length && acActiveIndex >= 0){
+          e.preventDefault();
+          seleccionarProductoDesdeAC(acActiveIndex);
+        }
+      }else if(e.key === 'Escape'){
+        closeAC();
+      }
+    });
+
+    document.addEventListener('click', (e)=>{
+      if(!acOpen) return;
+      const wrap = inputBusqueda.closest('.autocomplete-wrap');
+      if(wrap && !wrap.contains(e.target)){
+        closeAC();
+      }
+    });
+
+    // Cargar categorías
+    async function cargarCategorias() {
+      try {
+        const res = await fetch(API_CATEGORIAS);
+        if (!res.ok) throw new Error('Error al cargar categorías');
+        const data = await res.json();
+
+        selectCategoria.innerHTML = '<option value="">Seleccione una categoría</option>';
+        data.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat.id_categoria;
+          opt.textContent = cat.nombre_categoria;
+          selectCategoria.appendChild(opt);
+        });
+      } catch (err) {
+        console.error(err);
+        alert('No se pudieron cargar las categorías.');
+      }
+    }
+
+    // Cargar proveedores
+    async function cargarProveedores() {
+      try {
+        const res = await fetch(API_PROVEEDORES);
+        if (!res.ok) throw new Error('Error al cargar proveedores');
+        const data = await res.json();
+
+        selectProveedor.innerHTML = '<option value="">Sin proveedor asignado</option>';
+        data.forEach(prov => {
+          const opt = document.createElement('option');
+          opt.value = prov.id_proveedor;
+          opt.textContent = prov.nombre_proveedor;
+          selectProveedor.appendChild(opt);
+        });
+      } catch (err) {
+        console.error(err);
+        alert('No se pudieron cargar los proveedores.');
+      }
+    }
+
+    function llenarFormularioProducto(prod) {
+      document.getElementById('id_producto').value           = prod.id_producto || '';
+      document.getElementById('codigo_barra').value          = prod.codigo_barra || '';
+      document.getElementById('codigo_interno').value        = prod.codigo_interno || '';
+      document.getElementById('nombre_producto').value       = prod.nombre_producto || '';
+      document.getElementById('descripcion').value           = prod.descripcion || '';
+      document.getElementById('unidad_medida').value         = prod.unidad_medida || 'unidad';
+      document.getElementById('stock_actual').value          = prod.stock_actual ?? 0;
+      document.getElementById('stock_minimo').value          = prod.stock_minimo ?? 0;
+      document.getElementById('precio_compra').value         = prod.precio_compra ?? 0;
+      document.getElementById('precio_venta_cliente').value  = prod.precio_venta_cliente ?? 0;
+      document.getElementById('precio_venta_camion').value   = prod.precio_venta_camion ?? 0;
+      document.getElementById('precio_venta_preventa').value = prod.precio_venta_preventa ?? 0;
+      document.getElementById('estado').value                = prod.estado || 'activo';
+      document.getElementById('notas').value                 = prod.notas || '';
+
+      selectCategoria.value = prod.id_categoria ? String(prod.id_categoria) : '';
+      selectProveedor.value = prod.id_proveedor ? String(prod.id_proveedor) : '';
+
+      btnGuardarProducto.innerHTML = '<i class="fa-solid fa-floppy-disk"></i>&nbsp;Actualizar producto';
+    }
+
+    function limpiarFormularioProducto() {
+      productoForm.reset();
+      document.getElementById('id_producto').value = '';
+      btnGuardarProducto.innerHTML = '<i class="fa-solid fa-floppy-disk"></i>&nbsp;Guardar producto';
+    }
+
+    // Submit buscador exacto
+    buscadorProductoForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      closeAC();
+
+      const termino = inputBusqueda.value.trim();
+      if (!termino) {
+        alert('Escribe al menos un código o nombre para buscar.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_PRODUCTOS}/buscar?termino=${encodeURIComponent(termino)}`);
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          alert(data.message || 'Producto no encontrado.');
+          return;
+        }
+
+        llenarFormularioProducto(data);
+      } catch (err) {
+        console.error(err);
+        alert('Error al buscar el producto.');
+      }
+    });
+
+    // Crear / actualizar
+    productoForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id_producto = document.getElementById('id_producto').value;
+
+      const payload = {
+        id_categoria: document.getElementById('id_categoria').value,
+        id_proveedor: document.getElementById('id_proveedor').value || null,
+        codigo_barra: document.getElementById('codigo_barra').value.trim() || null,
+        codigo_interno: document.getElementById('codigo_interno').value.trim() || null,
+        nombre_producto: document.getElementById('nombre_producto').value.trim(),
+        descripcion: document.getElementById('descripcion').value.trim() || null,
+        unidad_medida: document.getElementById('unidad_medida').value.trim() || 'unidad',
+        stock_actual: parseFloat(document.getElementById('stock_actual').value || '0'),
+        stock_minimo: parseFloat(document.getElementById('stock_minimo').value || '0'),
+        precio_compra: parseFloat(document.getElementById('precio_compra').value || '0'),
+        precio_venta_cliente: parseFloat(document.getElementById('precio_venta_cliente').value || '0'),
+        precio_venta_camion: parseFloat(document.getElementById('precio_venta_camion').value || '0'),
+        precio_venta_preventa: parseFloat(document.getElementById('precio_venta_preventa').value || '0'),
+        estado: document.getElementById('estado').value || 'activo',
+        notas: document.getElementById('notas').value.trim() || null,
+      };
+
+      if (!payload.nombre_producto) { alert('El nombre del producto es obligatorio.'); return; }
+      if (!payload.id_categoria) { alert('Selecciona una categoría.'); return; }
+
+      const esEditar = !!id_producto;
+      const url      = esEditar ? `${API_PRODUCTOS}/${id_producto}` : API_PRODUCTOS;
+      const metodo   = esEditar ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method: metodo,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert(data.message || 'Error al guardar el producto.');
+          return;
+        }
+
+        llenarFormularioProducto(data);
+
+        // refrescar catálogo para sugerencias
+        catalogoProductos = [];
+        await ensureCatalogoCargado();
+
+        alert('Producto guardado correctamente.');
+      } catch (err) {
+        console.error(err);
+        alert('Ocurrió un error guardando el producto.');
+      }
+    });
+
+    // Eliminar
+    btnEliminarProducto.addEventListener('click', async () => {
+      const id = document.getElementById('id_producto').value;
+      if (!id) {
+        alert('Primero carga un producto (buscar) antes de intentar eliminar.');
+        return;
+      }
+
+      if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
+
+      try {
+        const res = await fetch(`${API_PRODUCTOS}/${id}`, { method: 'DELETE' });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          alert(data.message || 'Error al eliminar el producto.');
+          return;
+        }
+
+        limpiarFormularioProducto();
+
+        catalogoProductos = [];
+        await ensureCatalogoCargado();
+
+        alert('Producto eliminado correctamente.');
+      } catch (err) {
+        console.error(err);
+        alert('Ocurrió un error eliminando el producto.');
+      }
+    });
+
+    // Limpiar
+    btnLimpiarProducto.addEventListener('click', () => {
+      setTimeout(() => limpiarFormularioProducto(), 0);
+    });
+
+    (async () => {
+      await Promise.all([cargarCategorias(), cargarProveedores()]);
+      try { await ensureCatalogoCargado(); } catch(e){ console.error(e); }
+    })();
+  </script>
+</body>
+</html>

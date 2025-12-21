@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Administrativo | Distribuidora MyM</title>
+
+  <link rel="stylesheet" href="css/stylebackend.css">
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+</head>
+
+<body class="admin-body">
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <span class="sidebar-logo-icon">MyM</span>
+        <div class="sidebar-logo-text">
+          <h1>Distribuidora MyM</h1>
+          <p>Panel administrativo</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul>
+        <li class="active">
+          <a href="adminv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+                <li>
+          <a href="vendedorv.html">
+            <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span>
+            <span>Ventas</span>
+          </a>
+        </li>
+
+         <li>
+          <a href="detalle.venta.html">
+            <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
+            <span>Detalle de ventas</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="comprasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box"></i></span>
+            <span>Compras</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="clientesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+            <span>Clientes / Créditos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="inventarioav.html">
+            <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <span>Inventario</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="productosv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hotdog"></i></span>
+            <span>Productos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="categoriasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
+            <span>Categorías</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="proveedoresv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-field"></i></span>
+            <span>Proveedores</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="reportesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+            <span>Reportes</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="ctasporcobrarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span>Ctas. por cobrar</span>
+          </a>
+        </li>
+        <li>
+          <a href="ctaspagarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span>Ctas. por pagar</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="rusuario.html">
+            <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+            <span>Usuarios</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <small>Distribuidora MyM</small>
+      <small class="muted">Control de ventas, inventario y créditos</small>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-area">
+
+    <header class="topbar">
+      <button class="menu-toggle" id="sidebarToggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="topbar-title">
+        <h2>Dashboard general</h2>
+        <p>Resumen de operaciones de Distribuidora MyM</p>
+      </div>
+
+      <div class="topbar-user">
+        <div class="user-info">
+          <span class="user-name">Usuario: Admin</span>
+          <span class="user-role">Distribuidora MyM</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- KPIs -->
+      <section class="section">
+        <div class="section-header">
+          <h3>Resumen de hoy</h3>
+          <p>Visión rápida de ventas, ganancias e inventario.</p>
+        </div>
+
+        <div class="cards-grid">
+          <article class="card stat-card">
+            <div class="stat-header"><span class="stat-label">Ventas de hoy</span></div>
+            <div class="stat-value" id="kpiVentasHoy">Q 0.00</div>
+            <div class="stat-footer"><span class="stat-desc">Incluye ventas de contado y a crédito.</span></div>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-header"><span class="stat-label">Ventas del mes</span></div>
+            <div class="stat-value" id="kpiVentasMes">Q 0.00</div>
+            <div class="stat-footer"><span class="stat-desc">Total acumulado del mes actual.</span></div>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-header"><span class="stat-label">Ganancia estimada</span></div>
+            <div class="stat-value" id="kpiGananciaMes">Q 0.00</div>
+            <div class="stat-footer"><span class="stat-desc">Venta menos costo de los productos.</span></div>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-header"><span class="stat-label">Créditos activos</span></div>
+            <div class="stat-value" id="kpiCreditosActivos">0</div>
+            <div class="stat-footer"><span class="stat-desc">Clientes con saldo pendiente de pago.</span></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Accesos -->
+      <section class="section">
+        <div class="section-header">
+          <h3>Accesos rápidos</h3>
+          <p>Atajos para las operaciones más importantes del sistema.</p>
+        </div>
+
+        <div class="quick-actions">
+          <a href="vendedorv.html" class="btn-primary">
+            <i class="fa-solid fa-cash-register"></i>&nbsp;Nueva venta
+          </a>
+          <a href="productosv.html" class="btn-secondary">
+            <i class="fa-solid fa-hotdog"></i>&nbsp;Agregar producto
+          </a>
+          <a href="inventarioav.html" class="btn-outline">
+            <i class="fa-solid fa-boxes-stacked"></i>&nbsp;Ver inventario
+          </a>
+          <a href="comprasv.html" class="btn-outline">
+            <i class="fa-solid fa-truck-field"></i>&nbsp;Registrar compra
+          </a>
+          <a href="ctasporcobrarv.html" class="btn-outline">
+            <i class="fa-solid fa-hand-holding-dollar"></i>&nbsp;Créditos a clientes
+          </a>
+          <a href="reportesv.html" class="btn-outline">
+            <i class="fa-solid fa-chart-line"></i>&nbsp;Reportes de ventas
+          </a>
+        </div>
+      </section>
+
+      <!-- Ventas / Compras -->
+      <section class="section two-columns">
+        <div class="column">
+          <div class="section-header small">
+            <h3>Últimas ventas</h3>
+            <p>Resumen de las ventas más recientes (últimas 5).</p>
+          </div>
+          <div class="card table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Total</th>
+                  <th>Tipo</th>
+                </tr>
+                </thead>
+                <tbody id="tbodyUltimasVentas">
+                  <tr><td colspan="4" class="empty-row">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="section-header small">
+            <h3>Últimas compras a proveedores</h3>
+            <p>Entradas de producto al inventario (últimas 5).</p>
+          </div>
+          <div class="card table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Proveedor</th>
+                  <th>Total</th>
+                  <th>Pagado</th>
+                </tr>
+                </thead>
+                <tbody id="tbodyUltimasCompras">
+                  <tr><td colspan="4" class="empty-row">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Inventario bajo / Mas-Menos vendidos -->
+      <section class="section two-columns">
+        <div class="column">
+          <div class="section-header small">
+            <h3>Productos con inventario bajo</h3>
+            <p>Productos que necesitan reposición (top 5).</p>
+          </div>
+          <div class="card table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Stock</th>
+                  <th>Mínimo</th>
+                </tr>
+                </thead>
+                <tbody id="tbodyInventarioBajo">
+                  <tr><td colspan="3" class="empty-row">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="section-header small">
+            <h3>Más / menos vendidos</h3>
+            <p>Top 5 del mes (cantidad vendida).</p>
+          </div>
+          <div class="card table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Vendidos</th>
+                  <th>Tipo</th>
+                </tr>
+                </thead>
+                <tbody id="tbodyMasMenosVendidos">
+                  <tr><td colspan="3" class="empty-row">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Créditos próximos / Ventas 7 días -->
+      <section class="section two-columns">
+        <div class="column">
+          <div class="section-header small">
+            <h3>Créditos próximos a cobrar</h3>
+            <p>Top 5 por fecha de vencimiento.</p>
+          </div>
+          <div class="card table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Saldo</th>
+                  <th>Vence</th>
+                </tr>
+                </thead>
+                <tbody id="tbodyCreditosProximos">
+                  <tr><td colspan="3" class="empty-row">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="section-header small">
+            <h3>Ventas últimos 7 días</h3>
+            <p>Mini resumen diario.</p>
+          </div>
+          <div class="card table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                <tr>
+                  <th>Día</th>
+                  <th>Total</th>
+                </tr>
+                </thead>
+                <tbody id="tbodyVentas7">
+                  <tr><td colspan="2" class="empty-row">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="admin-footer">
+      <span>&copy; <span id="year"></span> Distribuidora MyM</span>
+      <span class="footer-separator">|</span>
+      <span>Panel interno de gestión</span>
+    </footer>
+  </div>
+</div>
+
+<script>
+  // Sidebar + año
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  const yearSpan = document.getElementById('year');
+
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('sidebar-open'));
+  }
+  if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+
+  // ✅ FUNCIÓN MEJORADA PARA FORMATEAR FECHA/HORA
+  function formatDateTime(v) {
+    if (!v) return '—';
+    
+    // MySQL devuelve formato: 'YYYY-MM-DD HH:mm:ss'
+    // Reemplazamos el espacio con 'T' para que JavaScript lo parsee correctamente
+    const dateStr = String(v).replace(' ', 'T');
+    const d = new Date(dateStr);
+    
+    if (isNaN(d.getTime())) {
+      // Si falla el parseo, intentamos mostrar solo la fecha
+      return String(v).slice(0, 10);
+    }
+    
+    // Formato personalizado: DD/MM/YYYY, HH:mm AM/PM
+    const dia = String(d.getDate()).padStart(2, '0');
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const año = d.getFullYear();
+    
+    let hora = d.getHours();
+    const min = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hora >= 12 ? 'p. m.' : 'a. m.';
+    
+    hora = hora % 12;
+    if (hora === 0) hora = 12;
+    
+    return `${dia}/${mes}/${año}, ${hora}:${min} ${ampm}`;
+  }
+
+  // Helpers
+  const fmtQ = (n) => 'Q ' + (Number(n) || 0).toFixed(2);
+
+  async function cargarDashboard() {
+    try {
+      const res = await fetch('/api/admin/dashboard');
+      if (!res.ok) throw new Error('No se pudo cargar dashboard');
+      const data = await res.json();
+
+      // KPIs
+      document.getElementById('kpiVentasHoy').textContent = fmtQ(data.kpis?.ventas_hoy);
+      document.getElementById('kpiVentasMes').textContent = fmtQ(data.kpis?.ventas_mes);
+      document.getElementById('kpiGananciaMes').textContent = fmtQ(data.kpis?.ganancia_estimada_mes);
+      document.getElementById('kpiCreditosActivos').textContent = String(data.kpis?.creditos_activos || 0);
+
+      // Últimas ventas
+      const tv = document.getElementById('tbodyUltimasVentas');
+      const ventas = data.tablas?.ultimas_ventas || [];
+      tv.innerHTML = ventas.length ? ventas.map(v => `
+        <tr>
+          <td>${formatDateTime(v.fecha_venta)}</td>
+          <td>${v.nombre_cliente || '—'}</td>
+          <td>${fmtQ(v.total_neto)}</td>
+          <td>${(v.tipo_venta === 'credito') ? 'Crédito' : 'Contado'}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="4" class="empty-row">Sin registros todavía.</td></tr>`;
+
+      // Últimas compras
+      const tc = document.getElementById('tbodyUltimasCompras');
+      const compras = data.tablas?.ultimas_compras || [];
+      tc.innerHTML = compras.length ? compras.map(c => `
+        <tr>
+          <td>${formatDateTime(c.fecha_compra)}</td>
+          <td>${c.nombre_proveedor || '—'}</td>
+          <td>${fmtQ(c.total)}</td>
+          <td>${fmtQ(c.pagado)}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="4" class="empty-row">Sin registros todavía.</td></tr>`;
+
+      // Inventario bajo
+      const ti = document.getElementById('tbodyInventarioBajo');
+      const inv = data.tablas?.inventario_bajo || [];
+      ti.innerHTML = inv.length ? inv.map(p => `
+        <tr>
+          <td>${p.nombre_producto}</td>
+          <td>${Number(p.stock_actual || 0)}</td>
+          <td>${Number(p.stock_minimo || 0)}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="3" class="empty-row">Sin alertas por ahora.</td></tr>`;
+
+      // Más / menos vendidos (en una tabla)
+      const tm = document.getElementById('tbodyMasMenosVendidos');
+      const mas = data.tablas?.productos_mas_vendidos || [];
+      const menos = data.tablas?.productos_menos_vendidos || [];
+      const rows = [];
+
+      for (const p of mas) {
+        rows.push(`
+          <tr>
+            <td>${p.nombre_producto}</td>
+            <td>${Number(p.cantidad_vendida || 0)}</td>
+            <td>Más vendido</td>
+          </tr>
+        `);
+      }
+      for (const p of menos) {
+        rows.push(`
+          <tr>
+            <td>${p.nombre_producto}</td>
+            <td>${Number(p.cantidad_vendida || 0)}</td>
+            <td>Menos vendido</td>
+          </tr>
+        `);
+      }
+      tm.innerHTML = rows.length ? rows.join('') : `<tr><td colspan="3" class="empty-row">Sin estadísticas todavía.</td></tr>`;
+
+      // Créditos próximos
+      const tcr = document.getElementById('tbodyCreditosProximos');
+      const cr = data.tablas?.creditos_proximos || [];
+      tcr.innerHTML = cr.length ? cr.map(x => `
+        <tr>
+          <td>${x.nombre_cliente}</td>
+          <td>${fmtQ(x.saldo_pendiente)}</td>
+          <td>${x.fecha_vencimiento ? String(x.fecha_vencimiento).slice(0,10) : '—'}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="3" class="empty-row">Sin créditos registrados.</td></tr>`;
+
+      // Ventas 7 días
+      const t7 = document.getElementById('tbodyVentas7');
+      const v7 = data.tablas?.ventas_ultimos_7_dias || [];
+      t7.innerHTML = v7.length ? v7.map(r => `
+        <tr>
+          <td>${String(r.dia).slice(0,10)}</td>
+          <td>${fmtQ(r.total)}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="2" class="empty-row">Sin datos para mostrar.</td></tr>`;
+
+    } catch (e) {
+      console.error(e);
+      alert('Error al cargar el dashboard. Revisa consola del backend.');
+    }
+  }
+
+  cargarDashboard();
+</script>
+</body>
+</html>

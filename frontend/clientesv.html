@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clientes | Distribuidora MyM</title>
+
+  <link rel="stylesheet" href="css/stylebackend.css">
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 1.1rem;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.4);
+      max-width: 900px;
+      width: 96%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 0.9rem 1.4rem;
+      border-bottom: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body {
+      padding: 1rem 1.4rem 1.2rem;
+      overflow-y: auto;
+    }
+    .modal-footer {
+      padding: 0.8rem 1.4rem 1rem;
+      border-top: 1px solid #e5e5e5;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6rem;
+    }
+    .modal-close {
+      border: none;
+      background: transparent;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+    @media (max-width: 800px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <span class="sidebar-logo-icon">MyM</span>
+        <div class="sidebar-logo-text">
+          <h1>Distribuidora MyM</h1>
+          <p>Panel administrativo</p>
+        </div>
+      </div>
+    </div>
+
+       <nav class="sidebar-nav">
+      <ul>
+        <li >
+          <a href="adminv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+                <li>
+          <a href="vendedorv.html">
+            <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span>
+            <span>Ventas</span>
+          </a>
+        </li>
+
+         <li>
+          <a href="detalle.venta.html">
+            <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
+            <span>Detalle de ventas</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="comprasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box"></i></span>
+            <span>Compras</span>
+          </a>
+        </li>
+
+        <li class="active">
+          <a href="clientesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+            <span>Clientes / Créditos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="inventarioav.html">
+            <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <span>Inventario</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="productosv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hotdog"></i></span>
+            <span>Productos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="categoriasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
+            <span>Categorías</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="proveedoresv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-field"></i></span>
+            <span>Proveedores</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="reportesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+            <span>Reportes</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="ctasporcobrarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span>Ctas. por cobrar</span>
+          </a>
+        </li>
+        <li>
+          <a href="ctaspagarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span>Ctas. por pagar</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="rusuario.html">
+            <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+            <span>Usuarios</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <small>Distribuidora MyM</small>
+      <small class="muted">Gestión de clientes y créditos</small>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-toggle" id="sidebarToggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="topbar-title">
+        <h2>Clientes / Créditos</h2>
+        <p>Registra clientes y lleva el control de su información y créditos futuros.</p>
+      </div>
+
+      <div class="topbar-user">
+        <div class="user-info">
+          <span class="user-name">Usuario: Admin</span>
+          <span class="user-role">Distribuidora MyM</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="content">
+
+      <!-- ACCIÓN PRINCIPAL -->
+      <section class="section">
+        <div class="section-header">
+          <h3>Registrar nuevo cliente</h3>
+          <p>Almacena la información básica del cliente para futuras ventas y créditos.</p>
+        </div>
+
+        <div class="card">
+          <button type="button" class="btn-primary" id="btnNuevoCliente">
+            <i class="fa-solid fa-user-plus"></i>&nbsp;Nuevo cliente
+          </button>
+        </div>
+      </section>
+
+      <!-- LISTADO DE CLIENTES -->
+      <section class="section">
+        <div class="section-header small">
+          <h3>Listado de clientes</h3>
+          <p>Consulta rápidamente los datos de contacto y su límite de crédito.</p>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-wrapper">
+            <table id="tablaClientes">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>NIT</th>
+                <th>Teléfono</th>
+                <th>Límite crédito</th>
+                <th>Saldo crédito</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td colspan="8" class="empty-row">
+                  No hay clientes registrados todavía.
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="admin-footer">
+      <span>&copy; <span id="year"></span> Distribuidora MyM</span>
+      <span class="footer-separator">|</span>
+      <span>Módulo de clientes</span>
+    </footer>
+
+  </div>
+</div>
+
+<!-- MODAL NUEVO CLIENTE -->
+<div class="modal-backdrop" id="modalCliente">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Nuevo cliente</h3>
+      <button type="button" class="modal-close" id="btnCerrarModalCliente">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="formCliente">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="nombre_cliente">Nombre del cliente</label>
+            <input type="text" id="nombre_cliente" required
+                   placeholder="Ej. Juan Pérez, Tienda La Esquina">
+          </div>
+
+          <div class="form-group">
+            <label for="nit_cliente">NIT</label>
+            <input type="text" id="nit_cliente"
+                   placeholder="Ej. 1234567-8 o CF">
+          </div>
+
+          <div class="form-group">
+            <label for="telefono_cliente">Teléfono</label>
+            <input type="text" id="telefono_cliente"
+                   placeholder="Ej. 5555-5555">
+          </div>
+
+          <div class="form-group">
+            <label for="email_cliente">Correo electrónico</label>
+            <input type="email" id="email_cliente"
+                   placeholder="Opcional">
+          </div>
+
+          <div class="form-group" style="grid-column:1 / -1;">
+            <label for="direccion_cliente">Dirección</label>
+            <textarea id="direccion_cliente" rows="2"
+                      style="resize:vertical; padding:0.55rem 0.7rem; border-radius:0.5rem; border:1px solid #d1d1d1; font-size:0.9rem; background:#fafafa; outline:none;"
+                      placeholder="Ej. 1a calle 2-45 zona 1, San Agustín Acasaguatlán"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="limite_credito_cliente">Límite de crédito (Q)</label>
+            <input type="number" id="limite_credito_cliente" min="0" step="0.01" value="0">
+          </div>
+
+          <div class="form-group" style="grid-column:1 / -1;">
+            <label for="notas_cliente">Notas</label>
+            <textarea id="notas_cliente" rows="2"
+                      style="resize:vertical; padding:0.55rem 0.7rem; border-radius:0.5rem; border:1px solid #d1d1d1; font-size:0.9rem; background:#fafafa; outline:none;"
+                      placeholder="Notas adicionales sobre el cliente (opcional)"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" id="btnCancelarCliente">
+        <i class="fa-solid fa-circle-xmark"></i>&nbsp;Cancelar
+      </button>
+      <button type="button" class="btn-primary" id="btnGuardarCliente">
+        <i class="fa-solid fa-floppy-disk"></i>&nbsp;Guardar cliente
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== Sidebar + año =====
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebar       = document.getElementById('sidebar');
+  const yearSpan      = document.getElementById('year');
+
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('sidebar-open');
+    });
+  }
+  if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
+  }
+
+  // ====== CONSTANTES API ======
+  const API_CLIENTES = '/api/clientes';
+
+  // ====== ELEMENTOS DOM ======
+  const tablaClientesBody   = document.querySelector('#tablaClientes tbody');
+
+  const btnNuevoCliente     = document.getElementById('btnNuevoCliente');
+  const modalCliente        = document.getElementById('modalCliente');
+  const btnCerrarModalCliente = document.getElementById('btnCerrarModalCliente');
+  const btnCancelarCliente  = document.getElementById('btnCancelarCliente');
+  const btnGuardarCliente   = document.getElementById('btnGuardarCliente');
+  const formCliente         = document.getElementById('formCliente');
+
+  const nombreInput         = document.getElementById('nombre_cliente');
+  const nitInput            = document.getElementById('nit_cliente');
+  const telInput            = document.getElementById('telefono_cliente');
+  const emailInput          = document.getElementById('email_cliente');
+  const direccionInput      = document.getElementById('direccion_cliente');
+  const limiteCreditoInput  = document.getElementById('limite_credito_cliente');
+  const notasInput          = document.getElementById('notas_cliente');
+
+  // ====== MODAL ======
+  function abrirModalCliente() {
+    modalCliente.classList.add('open');
+  }
+  function cerrarModalCliente() {
+    modalCliente.classList.remove('open');
+    formCliente.reset();
+    limiteCreditoInput.value = 0;
+  }
+
+  // ====== AYUDAS ======
+  function formatearMoneda(q) {
+    return (Number(q) || 0).toFixed(2);
+  }
+
+  // ====== CARGAR CLIENTES ======
+  async function cargarClientes() {
+    try {
+      const res = await fetch(API_CLIENTES);
+      if (!res.ok) throw new Error('Error al listar clientes');
+      const clientes = await res.json();
+
+      tablaClientesBody.innerHTML = '';
+
+      if (!clientes || clientes.length === 0) {
+        tablaClientesBody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-row">
+              No hay clientes registrados todavía.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      clientes.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${c.id_cliente}</td>
+          <td>
+            <strong>${c.nombre_cliente}</strong><br>
+            <span style="font-size:0.8rem; color:#666;">
+              ${c.direccion || ''} ${c.email ? ' · ' + c.email : ''}
+            </span>
+          </td>
+          <td>${c.nit || 'CF'}</td>
+          <td>${c.telefono || ''}</td>
+          <td>Q ${formatearMoneda(c.limite_credito)}</td>
+          <td>Q ${formatearMoneda(c.saldo_credito)}</td>
+          <td>
+            <span class="badge ${
+              c.estado === 'activo' ? 'badge-success' : 'badge-secondary'
+            }">${c.estado}</span>
+          </td>
+          <td class="tabla-acciones">
+            <!-- A futuro: botón para ver créditos, historial, etc. -->
+            <button type="button" class="btn-icon" title="(futuro) Ver créditos">
+              <i class="fa-solid fa-file-invoice-dollar"></i>
+            </button>
+          </td>
+        `;
+        tablaClientesBody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Error al cargar los clientes.');
+    }
+  }
+
+  // ====== GUARDAR CLIENTE ======
+  btnGuardarCliente.addEventListener('click', async () => {
+    const nombre      = nombreInput.value.trim();
+    const nit         = nitInput.value.trim() || null;
+    const telefono    = telInput.value.trim() || null;
+    const email       = emailInput.value.trim() || null;
+    const direccion   = direccionInput.value.trim() || null;
+    const notas       = notasInput.value.trim() || null;
+    const limiteCred  = parseFloat(limiteCreditoInput.value || '0');
+
+    if (!nombre) {
+      alert('El nombre del cliente es obligatorio.');
+      return;
+    }
+    if (limiteCred < 0) {
+      alert('El límite de crédito no puede ser negativo.');
+      return;
+    }
+
+    const payload = {
+      nombre_cliente: nombre,
+      nit,
+      telefono,
+      direccion,
+      email,
+      limite_credito: limiteCred,
+      notas
+    };
+
+    try {
+      const res = await fetch(API_CLIENTES, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(data.message || 'Error al guardar el cliente.');
+        return;
+      }
+
+      alert('Cliente registrado correctamente.');
+      cerrarModalCliente();
+      await cargarClientes();
+    } catch (err) {
+      console.error(err);
+      alert('Ocurrió un error al guardar el cliente.');
+    }
+  });
+
+  // ====== LISTENERS DE MODAL ======
+  btnNuevoCliente.addEventListener('click', () => {
+    cerrarModalCliente();
+    abrirModalCliente();
+  });
+  btnCerrarModalCliente.addEventListener('click', cerrarModalCliente);
+  btnCancelarCliente.addEventListener('click', cerrarModalCliente);
+
+  modalCliente.addEventListener('click', (e) => {
+    if (e.target === modalCliente) cerrarModalCliente();
+  });
+
+  // ====== INIT ======
+  (async function initClientes() {
+    await cargarClientes();
+  })();
+</script>
+
+</body>
+</html>

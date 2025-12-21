@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detalle de ventas | Distribuidora MyM</title>
+
+  <link rel="stylesheet" href="css/stylebackend.css">
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+  <style>
+    .card, .user-card, .user-form { overflow: visible !important; }
+
+    /* Buscador */
+    .filters-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+    @media (max-width: 1000px){
+      .filters-grid{ grid-template-columns: 1fr 1fr; }
+      .filters-grid .actions{ grid-column: 1 / -1; display:flex; gap:10px; justify-content:flex-end; }
+    }
+    .btn-primary, .btn-secondary{ white-space: nowrap; }
+
+    /* Botón icono en tabla */
+    .btn-eye{
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 1.05rem;
+      padding: 6px 8px;
+      border-radius: 10px;
+    }
+    .btn-eye:hover{ background: rgba(186, 63, 44, .12); }
+
+    /* Modal */
+    .modal-backdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .modal-hidden{ display:none !important; }
+    .modal-card{
+      background:#fff;
+      border-radius: 16px;
+      width: min(980px, 92vw);
+      box-shadow: 0 18px 45px rgba(0,0,0,.22);
+      overflow: hidden;
+    }
+    .modal-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding: 14px 16px;
+      background: rgba(248,250,252,.95);
+      border-bottom:1px solid rgba(148,163,184,.35);
+    }
+    .modal-header h3{ margin:0; font-size:1.05rem; }
+    .modal-close{
+      border:none;
+      background:transparent;
+      font-size:1.2rem;
+      cursor:pointer;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+    .modal-close:hover{ background: rgba(148,163,184,.18); }
+
+    .modal-body{
+      padding: 16px;
+      max-height: 78vh;
+      overflow:auto;
+    }
+
+    .detail-grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+    }
+    @media (max-width: 900px){
+      .detail-grid{ grid-template-columns: 1fr; }
+    }
+
+    .info-box{
+      border:1px solid rgba(148,163,184,.35);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,.9);
+    }
+    .info-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding: 6px 0;
+      border-bottom: 1px dashed rgba(148,163,184,.25);
+    }
+    .info-row:last-child{ border-bottom:none; }
+    .info-label{ color:#64748b; font-size:.85rem; }
+    .info-value{ font-weight: 800; color:#0f172a; }
+
+    .badge{
+      display:inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: .85rem;
+      font-weight: 800;
+      border:1px solid rgba(148,163,184,.25);
+    }
+    .b-ok{ background: rgba(240,253,244,.95); color:#166534; border-color: rgba(34,197,94,.25); }
+    .b-warn{ background: rgba(255,247,237,.95); color:#7c2d12; border-color: rgba(249,115,22,.25); }
+    .b-bad{ background: rgba(254,242,242,.95); color:#7f1d1d; border-color: rgba(239,68,68,.25); }
+
+    .table-mini{
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table-mini th, .table-mini td{
+      text-align: left;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(148,163,184,.22);
+      font-size: .92rem;
+      vertical-align: top;
+    }
+    .table-mini th{
+      font-size: .82rem;
+      color:#475569;
+      background: rgba(248,250,252,.8);
+    }
+    .right{ text-align:right; }
+    .muted{ color:#64748b; }
+
+    .empty-row{
+      text-align:center;
+      padding: 14px;
+      color:#64748b;
+    }
+  </style>
+</head>
+
+<body class="admin-body">
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <span class="sidebar-logo-icon">MyM</span>
+        <div class="sidebar-logo-text">
+          <h1>Distribuidora MyM</h1>
+          <p>Panel administrativo</p>
+        </div>
+      </div>
+    </div>
+
+      <nav class="sidebar-nav">
+      <ul>
+        <li >
+          <a href="adminv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+                <li>
+          <a href="vendedorv.html">
+            <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span>
+            <span>Ventas</span>
+          </a>
+        </li>
+
+         <li class="active">
+          <a href="detalle.venta.html">
+            <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
+            <span>Detalle de ventas</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="comprasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box"></i></span>
+            <span>Compras</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="clientesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+            <span>Clientes / Créditos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="inventarioav.html">
+            <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <span>Inventario</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="productosv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hotdog"></i></span>
+            <span>Productos</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="categoriasv.html">
+            <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
+            <span>Categorías</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="proveedoresv.html">
+            <span class="nav-icon"><i class="fa-solid fa-truck-field"></i></span>
+            <span>Proveedores</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="reportesv.html">
+            <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+            <span>Reportes</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="ctasporcobrarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span>Ctas. por cobrar</span>
+          </a>
+        </li>
+        <li>
+          <a href="ctaspagarv.html">
+            <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span>Ctas. por pagar</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="rusuario.html">
+            <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+            <span>Usuarios</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <small>Distribuidora MyM</small>
+      <small class="muted">Detalle de ventas</small>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-area">
+    <header class="topbar">
+      <button class="menu-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+      <div class="topbar-title">
+        <h2>Detalle de ventas</h2>
+        <p>Busca ventas por cliente, ID, día o mes y revisa el detalle completo.</p>
+      </div>
+      <div class="topbar-user">
+        <div class="user-info">
+          <span class="user-name">Usuario: Admin</span>
+          <span class="user-role">Distribuidora MyM</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- FILTROS -->
+      <section class="section">
+        <div class="section-header">
+          <h3>Buscador</h3>
+          <p>Usa uno o varios filtros. Si eliges "Día" o "Mes", eso manda.</p>
+        </div>
+
+        <div class="card user-card">
+          <form class="user-form" id="formFiltrosVentas">
+            <div class="filters-grid">
+              <div class="form-group">
+                <label for="f_id_venta">ID venta</label>
+                <input id="f_id_venta" type="number" min="1" placeholder="Ej. 8">
+              </div>
+
+              <div class="form-group">
+                <label for="f_cliente">Cliente</label>
+                <input id="f_cliente" type="text" placeholder="Ej. Jose / pablo flores">
+              </div>
+
+              <div class="form-group">
+                <label for="f_dia">Día</label>
+                <input id="f_dia" type="date">
+              </div>
+
+              <div class="form-group">
+                <label for="f_mes">Mes</label>
+                <input id="f_mes" type="month">
+              </div>
+
+              <div class="form-group actions" style="display:flex; gap:10px; justify-content:flex-end;">
+                <button type="button" class="btn-secondary" id="btnLimpiar">
+                  <i class="fa-solid fa-rotate-left"></i>&nbsp;Limpiar
+                </button>
+                <button type="submit" class="btn-primary">
+                  <i class="fa-solid fa-magnifying-glass"></i>&nbsp;Buscar
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- TABLA -->
+      <section class="section">
+        <div class="section-header small">
+          <h3>Ventas encontradas</h3>
+          <p>Se muestran hasta 50 resultados (puedes subir el límite en backend si quieres).</p>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-wrapper">
+            <table id="tablaVentas">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Tipo</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th>Ver</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="admin-footer">
+      <span>&copy; <span id="year"></span> Distribuidora MyM</span>
+      <span class="footer-separator">|</span>
+      <span>Módulo: Detalle de ventas</span>
+    </footer>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop modal-hidden" id="modalDetalle">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modalTitle">Detalle de venta</h3>
+      <button class="modal-close" id="btnCerrarModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="modal-body">
+      <div class="detail-grid">
+        <div class="info-box">
+          <div class="info-row">
+            <div class="info-label">Venta</div>
+            <div class="info-value" id="m_id"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Fecha</div>
+            <div class="info-value" id="m_fecha"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Cliente</div>
+            <div class="info-value" id="m_cliente"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Tipo</div>
+            <div class="info-value" id="m_tipo"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Estado</div>
+            <div class="info-value" id="m_estado"></div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-row">
+            <div class="info-label">Total bruto</div>
+            <div class="info-value" id="m_bruto"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Descuento</div>
+            <div class="info-value" id="m_descuento"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Total neto</div>
+            <div class="info-value" id="m_neto"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Efectivo recibido</div>
+            <div class="info-value" id="m_efectivo"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Cambio</div>
+            <div class="info-value" id="m_cambio"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top: 14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h4 style="margin:0;">Productos</h4>
+          <span class="muted" id="m_items_count"></span>
+        </div>
+
+        <div style="overflow:auto;">
+          <table class="table-mini" id="tablaItems">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th class="right">Cant.</th>
+                <th class="right">P. unit</th>
+                <th>Tipo precio</th>
+                <th class="right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Sidebar + año
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  const yearSpan = document.getElementById('year');
+  if (sidebarToggle && sidebar) sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('sidebar-open'));
+  if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+
+  // API
+  const API = '/api/ventas-detalle';
+
+  // DOM filtros
+  const form = document.getElementById('formFiltrosVentas');
+  const f_id = document.getElementById('f_id_venta');
+  const f_cliente = document.getElementById('f_cliente');
+  const f_dia = document.getElementById('f_dia');
+  const f_mes = document.getElementById('f_mes');
+  const btnLimpiar = document.getElementById('btnLimpiar');
+
+  // Tabla
+  const tbody = document.querySelector('#tablaVentas tbody');
+
+  // Modal
+  const modal = document.getElementById('modalDetalle');
+  const btnCerrarModal = document.getElementById('btnCerrarModal');
+  const m_id = document.getElementById('m_id');
+  const m_fecha = document.getElementById('m_fecha');
+  const m_cliente = document.getElementById('m_cliente');
+  const m_tipo = document.getElementById('m_tipo');
+  const m_estado = document.getElementById('m_estado');
+  const m_bruto = document.getElementById('m_bruto');
+  const m_descuento = document.getElementById('m_descuento');
+  const m_neto = document.getElementById('m_neto');
+  const m_efectivo = document.getElementById('m_efectivo');
+  const m_cambio = document.getElementById('m_cambio');
+  const m_items_count = document.getElementById('m_items_count');
+  const itemsBody = document.querySelector('#tablaItems tbody');
+
+  function moneyQ(n){ return `Q ${Number(n || 0).toFixed(2)}`; }
+
+  function badgeEstado(estado){
+    const e = String(estado || '').toLowerCase();
+    if (e === 'pagada') return `<span class="badge b-ok">pagada</span>`;
+    if (e === 'pendiente') return `<span class="badge b-warn">pendiente</span>`;
+    if (e === 'anulada') return `<span class="badge b-bad">anulada</span>`;
+    return `<span class="badge">${estado || ''}</span>`;
+  }
+
+  // ✅ FUNCIÓN MEJORADA - Formatea fechas correctamente
+  function formatDateTime(v){
+    if (!v) return '--';
+    
+    // MySQL devuelve formato: 'YYYY-MM-DD HH:mm:ss'
+    // Reemplazamos el espacio con 'T' para que JavaScript lo parsee correctamente
+    const dateStr = String(v).replace(' ', 'T');
+    const d = new Date(dateStr);
+    
+    if (isNaN(d.getTime())) return String(v);
+    
+    // Formato personalizado: DD/MM/YYYY HH:mm:ss
+    const dia = String(d.getDate()).padStart(2, '0');
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const año = d.getFullYear();
+    const hora = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    const seg = String(d.getSeconds()).padStart(2, '0');
+    
+    return `${dia}/${mes}/${año} ${hora}:${min}:${seg}`;
+  }
+
+  async function cargarVentas(){
+    const url = new URL(API, window.location.origin);
+
+    const idv = f_id.value ? Number(f_id.value) : null;
+    const cli = f_cliente.value.trim();
+    const dia = f_dia.value;
+    const mes = f_mes.value;
+
+    if (idv) url.searchParams.set('id_venta', idv);
+    if (cli) url.searchParams.set('cliente', cli);
+
+    // prioridad: día o mes
+    if (dia) {
+      url.searchParams.set('dia', dia);
+    } else if (mes) {
+      url.searchParams.set('mes', mes);
+    }
+
+    url.searchParams.set('limit', 50);
+
+    const res = await fetch(url.toString());
+    const data = await res.json().catch(() => []);
+    if (!res.ok) {
+      alert(data.message || 'Error al cargar ventas.');
+      return;
+    }
+
+    renderTabla(data);
+  }
+
+  function renderTabla(rows){
+    tbody.innerHTML = '';
+
+    if (!rows || rows.length === 0){
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-row">No se encontraron ventas con esos filtros.</td></tr>`;
+      return;
+    }
+
+    rows.forEach(v => {
+      const tr = document.createElement('tr');
+      tr.dataset.id = v.id_venta;
+
+      tr.innerHTML = `
+        <td>${v.id_venta}</td>
+        <td>${formatDateTime(v.fecha_venta || v.creado_en)}</td>
+        <td>${v.nombre_cliente || 'Venta sin cliente'}</td>
+        <td>${(v.tipo_venta || '').toLowerCase() === 'credito' ? 'Crédito' : 'Contado'}</td>
+        <td>${moneyQ(v.total_neto)}</td>
+        <td>${badgeEstado(v.estado)}</td>
+        <td>
+          <button class="btn-eye" type="button" title="Ver detalle">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function verDetalle(id){
+    const res = await fetch(`${API}/${id}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok){
+      alert(data.message || 'No se pudo cargar detalle.');
+      return;
+    }
+
+    const h = data.header;
+    const items = data.items || [];
+
+    m_id.textContent = `#${h.id_venta}`;
+    m_fecha.textContent = formatDateTime(h.fecha_venta || h.creado_en);
+    m_cliente.textContent = h.nombre_cliente || 'Venta sin cliente';
+    m_tipo.textContent = (h.tipo_venta || '').toLowerCase() === 'credito' ? 'Crédito' : 'Contado';
+    m_estado.innerHTML = badgeEstado(h.estado);
+
+    m_bruto.textContent = moneyQ(h.total_bruto);
+    m_descuento.textContent = moneyQ(h.descuento_total);
+    m_neto.textContent = moneyQ(h.total_neto);
+
+    // En crédito puede venir null (lo mostramos igual)
+    m_efectivo.textContent = h.efectivo_recibido == null ? '--' : moneyQ(h.efectivo_recibido);
+    m_cambio.textContent = h.cambio == null ? '--' : moneyQ(h.cambio);
+
+    m_items_count.textContent = `${items.length} producto(s)`;
+
+    itemsBody.innerHTML = '';
+    if (items.length === 0){
+      itemsBody.innerHTML = `<tr><td colspan="5" class="empty-row">No hay detalles para esta venta.</td></tr>`;
+    } else {
+      items.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${it.descripcion_producto}</td>
+          <td class="right">${Number(it.cantidad || 0).toFixed(2)}</td>
+          <td class="right">${moneyQ(it.precio_unitario)}</td>
+          <td>${it.tipo_precio}</td>
+          <td class="right">${moneyQ(it.subtotal)}</td>
+        `;
+        itemsBody.appendChild(tr);
+      });
+    }
+
+    modal.classList.remove('modal-hidden');
+  }
+
+  // Eventos
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    cargarVentas();
+  });
+
+  btnLimpiar.addEventListener('click', () => {
+    f_id.value = '';
+    f_cliente.value = '';
+    f_dia.value = '';
+    f_mes.value = '';
+    cargarVentas();
+  });
+
+  tbody.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-eye');
+    if (!btn) return;
+    const tr = btn.closest('tr');
+    if (!tr) return;
+    const id = tr.dataset.id;
+    if (id) verDetalle(id);
+  });
+
+  btnCerrarModal.addEventListener('click', () => modal.classList.add('modal-hidden'));
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('modal-hidden'); });
+
+  // Cargar al inicio (sin filtros: últimas 50)
+  cargarVentas();
+</script>
+
+</body>
+</html>
