@@ -1,30 +1,29 @@
 # Node
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+npm-debug.log
+yarn.lock
 
 # Env
 .env
-.env.*
-
-# OS / Editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-
-# Build / cache
-dist/
-build/
-.cache/
-
-# Dumps / backups (si no quieres subir tu BD)
-
-*.dump
-*.zip
-*.rar
 
 # Logs
 logs/
 *.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Database dumps
+*.sql
+
+# Railway
+.railway/
