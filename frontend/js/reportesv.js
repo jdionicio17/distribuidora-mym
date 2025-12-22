@@ -228,7 +228,7 @@
 
   async function loadUtilidad() {
     const p = qParams();
-    const res = await ffetch(`${API_BASE}/api/reportes/utilidad?${p.toString()}`);
+    const res = await fetch(`${API_BASE}/api/reportes/utilidad?${p.toString()}`);
     const data = await res.json();
     kpiVentas.textContent = fmt(data.ventas);
     kpiCosto.textContent = fmt(data.costo_estimado);
