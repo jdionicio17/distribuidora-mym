@@ -14,8 +14,16 @@ if (loginForm) {
       return;
     }
 
+    // Deshabilitar botón para evitar doble click
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Iniciando sesión...';
+
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
+      console.log('🔗 Intentando conectar a:', window.API_BASE); // ✅ Agregado window.
+      
+      const res = await fetch(`${window.API_BASE}/api/auth/login`, { // ✅ Agregado window.
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -23,10 +31,13 @@ if (loginForm) {
         body: JSON.stringify({ usuario, password })
       });
 
+      console.log('📡 Status de respuesta:', res.status);
+      
       const data = await res.json().catch(() => ({}));
+      console.log('📦 Datos recibidos:', data);
 
       if (!res.ok) {
-        alert(data.message || 'Error al iniciar sesión');
+        alert(data.message || 'Error al iniciar sesión. Verifica tus credenciales.');
         return;
       }
 
@@ -40,6 +51,8 @@ if (loginForm) {
         nombre_completo: usuarioLog.nombre_completo,
         rol: usuarioLog.rol
       }));
+
+      console.log('✅ Login exitoso, redirigiendo a:', rol);
 
       // Redirección según rol
       if (rol === 'admin') {
@@ -55,8 +68,12 @@ if (loginForm) {
       }
 
     } catch (err) {
-      console.error(err);
-      alert('Error al iniciar sesión');
+      console.error('❌ Error completo:', err);
+      alert('Error al conectar con el servidor. Verifica tu conexión a internet.');
+    } finally {
+      // Rehabilitar botón
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
     }
   });
 }
