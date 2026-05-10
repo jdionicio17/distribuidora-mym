@@ -1,49 +1,50 @@
 const db = require('../config/db');
 
-function mapProductoSelect() {
-  return `
-    SELECT 
-      p.id_producto,
-      p.codigo_producto,
-      p.codigo_producto AS codigo_interno,
-      p.codigo_producto AS codigo_barra,
-      p.nombre_producto,
-      p.descripcion,
-      p.id_categoria,
-      p.id_proveedor,
-      p.precio_compra,
-      p.precio_venta,
-      p.precio_venta AS precio_venta_cliente,
-      p.precio_venta AS precio_venta_camion,
-      p.precio_mayoreo AS precio_venta_preventa,
-      p.stock_actual,
-      p.stock_actual AS existencia,
-      p.stock_minimo,
-      p.unidad_medida,
-      p.estado,
-      p.creado_en,
-      p.creado_en AS actualizado_en,
-      c.nombre_categoria,
-      pr.nombre_proveedor
-    FROM productos p
-    LEFT JOIN categorias c ON c.id_categoria = p.id_categoria
-    LEFT JOIN proveedores pr ON pr.id_proveedor = p.id_proveedor
-  `;
-}
+const SELECT_PRODUCTOS = `
+  SELECT
+    p.id_producto,
+    p.id_categoria,
+    p.id_proveedor,
+    p.codigo_barra,
+    p.codigo_interno,
+    p.nombre_producto,
+    p.descripcion,
+    p.unidad_medida,
+    p.stock_actual,
+    p.stock_actual AS existencia,
+    p.stock_minimo,
+    p.precio_compra,
+    p.precio_venta_cliente,
+    p.precio_venta_cliente AS precio_cliente,
+    p.precio_venta_camion,
+    p.precio_venta_camion AS precio_camion,
+    p.precio_venta_preventa,
+    p.precio_venta_preventa AS precio_preventa,
+    p.estado,
+    p.notas,
+    p.creado_en,
+    p.actualizado_en,
+    c.nombre_categoria,
+    pr.nombre_proveedor
+  FROM productos p
+  LEFT JOIN categorias c ON c.id_categoria = p.id_categoria
+  LEFT JOIN proveedores pr ON pr.id_proveedor = p.id_proveedor
+`;
 
 async function buscarPorTermino(termino) {
   const term = String(termino || '').trim();
 
   const [rows] = await db.query(
     `
-    ${mapProductoSelect()}
+    ${SELECT_PRODUCTOS}
     WHERE
-      p.codigo_producto = ?
+      p.codigo_barra = ?
+      OR p.codigo_interno = ?
       OR LOWER(p.nombre_producto) LIKE CONCAT('%', LOWER(?), '%')
     ORDER BY p.nombre_producto ASC
     LIMIT 1
     `,
-    [term, term]
+    [term, term, term]
   );
 
   return rows[0] || null;
@@ -55,23 +56,24 @@ async function sugerenciasPorTermino(termino, limit = 10) {
 
   const [rows] = await db.query(
     `
-    ${mapProductoSelect()}
+    ${SELECT_PRODUCTOS}
     WHERE
       p.estado = 'activo'
       AND (
-        p.codigo_producto = ?
+        p.codigo_barra = ?
+        OR p.codigo_interno = ?
         OR LOWER(p.nombre_producto) LIKE CONCAT('%', LOWER(?), '%')
       )
     ORDER BY
       CASE
-        WHEN p.codigo_producto = ? THEN 0
+        WHEN p.codigo_barra = ? OR p.codigo_interno = ? THEN 0
         WHEN LOWER(p.nombre_producto) LIKE CONCAT(LOWER(?), '%') THEN 1
         ELSE 2
       END,
       p.nombre_producto ASC
     LIMIT ?
     `,
-    [term, term, term, term, lim]
+    [term, term, term, term, term, term, lim]
   );
 
   return rows;
@@ -91,10 +93,10 @@ async function listarConFiltros({ id_categoria = null, ordenar = 'nombre_asc' })
       orderBy = 'p.stock_actual ASC';
       break;
     case 'actualizado_desc':
-      orderBy = 'p.creado_en DESC';
+      orderBy = 'p.actualizado_en DESC';
       break;
     case 'actualizado_asc':
-      orderBy = 'p.creado_en ASC';
+      orderBy = 'p.actualizado_en ASC';
       break;
   }
 
@@ -108,7 +110,7 @@ async function listarConFiltros({ id_categoria = null, ordenar = 'nombre_asc' })
 
   const [rows] = await db.query(
     `
-    ${mapProductoSelect()}
+    ${SELECT_PRODUCTOS}
     WHERE ${where}
     ORDER BY ${orderBy}
     `,
@@ -121,7 +123,7 @@ async function listarConFiltros({ id_categoria = null, ordenar = 'nombre_asc' })
 async function obtenerPorId(id) {
   const [rows] = await db.query(
     `
-    ${mapProductoSelect()}
+    ${SELECT_PRODUCTOS}
     WHERE p.id_producto = ?
     `,
     [id]
@@ -131,39 +133,43 @@ async function obtenerPorId(id) {
 }
 
 async function crear(datos) {
-  const codigo = datos.codigo_interno || datos.codigo_barra || datos.codigo_producto;
-
   const [result] = await db.query(
     `
     INSERT INTO productos (
-      codigo_producto,
-      nombre_producto,
-      descripcion,
       id_categoria,
       id_proveedor,
-      precio_compra,
-      precio_venta,
-      precio_mayoreo,
+      codigo_barra,
+      codigo_interno,
+      nombre_producto,
+      descripcion,
+      unidad_medida,
       stock_actual,
       stock_minimo,
-      unidad_medida,
-      estado
+      precio_compra,
+      precio_venta_cliente,
+      precio_venta_camion,
+      precio_venta_preventa,
+      estado,
+      notas
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     [
-      codigo,
+      datos.id_categoria,
+      datos.id_proveedor || null,
+      datos.codigo_barra || null,
+      datos.codigo_interno || null,
       datos.nombre_producto,
       datos.descripcion || null,
-      datos.id_categoria || null,
-      datos.id_proveedor || null,
-      datos.precio_compra || 0,
-      datos.precio_venta_cliente || datos.precio_venta || 0,
-      datos.precio_venta_preventa || datos.precio_mayoreo || 0,
+      datos.unidad_medida || 'unidad',
       datos.stock_actual || 0,
       datos.stock_minimo || 0,
-      datos.unidad_medida || 'unidad',
-      datos.estado || 'activo'
+      datos.precio_compra || 0,
+      datos.precio_venta_cliente || 0,
+      datos.precio_venta_camion || 0,
+      datos.precio_venta_preventa || 0,
+      datos.estado || 'activo',
+      datos.notas || null
     ]
   );
 
@@ -171,39 +177,43 @@ async function crear(datos) {
 }
 
 async function actualizar(id, datos) {
-  const codigo = datos.codigo_interno || datos.codigo_barra || datos.codigo_producto;
-
   const [result] = await db.query(
     `
     UPDATE productos
     SET
-      codigo_producto = ?,
-      nombre_producto = ?,
-      descripcion = ?,
       id_categoria = ?,
       id_proveedor = ?,
-      precio_compra = ?,
-      precio_venta = ?,
-      precio_mayoreo = ?,
+      codigo_barra = ?,
+      codigo_interno = ?,
+      nombre_producto = ?,
+      descripcion = ?,
+      unidad_medida = ?,
       stock_actual = ?,
       stock_minimo = ?,
-      unidad_medida = ?,
-      estado = ?
+      precio_compra = ?,
+      precio_venta_cliente = ?,
+      precio_venta_camion = ?,
+      precio_venta_preventa = ?,
+      estado = ?,
+      notas = ?
     WHERE id_producto = ?
     `,
     [
-      codigo,
+      datos.id_categoria,
+      datos.id_proveedor || null,
+      datos.codigo_barra || null,
+      datos.codigo_interno || null,
       datos.nombre_producto,
       datos.descripcion || null,
-      datos.id_categoria || null,
-      datos.id_proveedor || null,
-      datos.precio_compra || 0,
-      datos.precio_venta_cliente || datos.precio_venta || 0,
-      datos.precio_venta_preventa || datos.precio_mayoreo || 0,
+      datos.unidad_medida || 'unidad',
       datos.stock_actual || 0,
       datos.stock_minimo || 0,
-      datos.unidad_medida || 'unidad',
+      datos.precio_compra || 0,
+      datos.precio_venta_cliente || 0,
+      datos.precio_venta_camion || 0,
+      datos.precio_venta_preventa || 0,
       datos.estado || 'activo',
+      datos.notas || null,
       id
     ]
   );
