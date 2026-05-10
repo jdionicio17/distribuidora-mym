@@ -138,10 +138,20 @@ async function actualizarProducto(req, res) {
 async function eliminarProducto(req, res) {
   try {
     const { id } = req.params;
-    const ok = await Producto.eliminar(id);
+    const result = await Producto.eliminar(id);
 
-    if (!ok) return res.status(404).json({ message: 'Producto no encontrado.' });
-    return res.json({ message: 'Producto eliminado correctamente.' });
+    if (!result || !result.ok) {
+      return res.status(404).json({ message: 'Producto no encontrado.' });
+    }
+
+    if (result.soft) {
+      return res.json({
+        message: 'El producto tiene movimientos registrados (compras/ventas), por lo que fue marcado como INACTIVO en lugar de eliminarlo. Así no se afectan los reportes históricos.',
+        soft: true
+      });
+    }
+
+    return res.json({ message: 'Producto eliminado correctamente.', soft: false });
   } catch (err) {
     console.error('Error al eliminar producto:', err);
     return res.status(500).json({ message: 'Error al eliminar el producto.' });

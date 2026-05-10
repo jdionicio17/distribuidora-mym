@@ -429,7 +429,7 @@
         catalogoProductos = [];
         await ensureCatalogoCargado();
 
-        alert('Producto eliminado correctamente.');
+        alert(data.message || 'Producto eliminado correctamente.');
       } catch (err) {
         console.error(err);
         alert('Ocurrió un error eliminando el producto.');

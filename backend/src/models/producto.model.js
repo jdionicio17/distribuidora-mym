@@ -223,12 +223,27 @@ async function actualizar(id, datos) {
   return result.affectedRows > 0;
 }
 
+// Intenta DELETE físico. Si hay FK (producto con movimientos en compras/ventas),
+// hace soft delete marcando estado='inactivo' para preservar el historial.
 async function eliminar(id) {
-  const [result] = await db.query(
-    'DELETE FROM productos WHERE id_producto = ?',
-    [id]
-  );
-  return result.affectedRows > 0;
+  try {
+    const [result] = await db.query(
+      'DELETE FROM productos WHERE id_producto = ?',
+      [id]
+    );
+    if (result.affectedRows === 0) return { ok: false };
+    return { ok: true, soft: false };
+  } catch (err) {
+    if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.errno === 1451) {
+      const [up] = await db.query(
+        `UPDATE productos SET estado = 'inactivo' WHERE id_producto = ?`,
+        [id]
+      );
+      if (up.affectedRows === 0) return { ok: false };
+      return { ok: true, soft: true };
+    }
+    throw err;
+  }
 }
 
 module.exports = {
