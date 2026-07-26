@@ -1,202 +1,473 @@
-// Toggle sidebar + año footer
+document.addEventListener('DOMContentLoaded', () => {
+    // ==================================================
+    // ELEMENTOS GENERALES
+    // ==================================================
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
     const yearSpan = document.getElementById('year');
 
+    const form = document.querySelector('.user-form');
+    const tbody = document.getElementById('usuarios-tbody');
+
+    // API_BASE debe encontrarse en config.js
+    // Si API_BASE no existe, utiliza la misma dirección del frontend
+    const BASE_URL =
+        typeof API_BASE !== 'undefined'
+            ? String(API_BASE).replace(/\/+$/, '')
+            : '';
+
+    const USUARIOS_URL = `${BASE_URL}/api/usuarios`;
+
+    // ==================================================
+    // SIDEBAR
+    // ==================================================
     if (sidebarToggle && sidebar) {
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('sidebar-open');
         });
     }
 
+    // ==================================================
+    // AÑO DEL FOOTER
+    // ==================================================
     if (yearSpan) {
         yearSpan.textContent = new Date().getFullYear();
     }
 
-    // ============================
-    // LÓGICA DE REGISTRO + LISTADO
-    // ============================
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.querySelector('.user-form');
-        const tbody = document.getElementById('usuarios-tbody');
+    // ==================================================
+    // FORMATEAR ROL
+    // ==================================================
+    function formatearRol(rol) {
+        switch (rol) {
+            case 'admin':
+                return 'Administrador';
 
-        // Cargar usuarios en la tabla
-        async function cargarUsuarios() {
-            try {
-                const res = await fetch(`${API_BASE}/api/usuarios`);
-                if (!res.ok) throw new Error('Error al obtener usuarios');
+            case 'ventas':
+                return 'Ventas';
 
-                const usuarios = await res.json();
+            case 'bodega':
+                return 'Bodega / Inventario';
 
-                tbody.innerHTML = '';
+            case 'cobros':
+                return 'Cobros / Créditos';
 
-                if (usuarios.length === 0) {
-                    const tr = document.createElement('tr');
-                    const td = document.createElement('td');
-                    td.colSpan = 6;
-                    td.textContent = 'Sin usuarios registrados aún.';
-                    td.classList.add('empty-row');
-                    tr.appendChild(td);
-                    tbody.appendChild(tr);
-                    return;
-                }
+            default:
+                return rol || 'Sin rol';
+        }
+    }
 
-                usuarios.forEach(u => {
-                    const tr = document.createElement('tr');
-
-                    // Usuario
-                    const tdUsuario = document.createElement('td');
-                    tdUsuario.textContent = u.usuario;
-                    tr.appendChild(tdUsuario);
-
-                    // Nombre completo
-                    const tdNombre = document.createElement('td');
-                    tdNombre.textContent = u.nombre_completo;
-                    tr.appendChild(tdNombre);
-
-                    // Rol
-                    const tdRol = document.createElement('td');
-                    tdRol.textContent = formatearRol(u.rol);
-                    tr.appendChild(tdRol);
-
-                    // Estado
-                    const tdEstado = document.createElement('td');
-                    const spanEstado = document.createElement('span');
-                    spanEstado.classList.add('badge');
-                    if (u.estado === 'activo') {
-                        spanEstado.classList.add('badge-success');
-                        spanEstado.textContent = 'Activo';
-                    } else {
-                        spanEstado.classList.add('badge-danger');
-                        spanEstado.textContent = 'Inactivo';
-                    }
-                    tdEstado.appendChild(spanEstado);
-                    tr.appendChild(tdEstado);
-
-                    // Último acceso
-                    const tdAcceso = document.createElement('td');
-                    if (u.ultimo_acceso) {
-                        const fecha = new Date(u.ultimo_acceso);
-                        const dia = String(fecha.getDate()).padStart(2, '0');
-                        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                        const anio = fecha.getFullYear();
-                        const hora = String(fecha.getHours()).padStart(2, '0');
-                        const min = String(fecha.getMinutes()).padStart(2, '0');
-                        tdAcceso.textContent = `${dia}/${mes}/${anio} ${hora}:${min}`;
-                    } else {
-                        tdAcceso.textContent = '--/--/----';
-                    }
-                    tr.appendChild(tdAcceso);
-
-                    // Acciones (por ahora sólo botones vacíos)
-                    const tdAcciones = document.createElement('td');
-                    tdAcciones.classList.add('tabla-acciones');
-
-                    const btnEditar = document.createElement('button');
-                    btnEditar.type = 'button';
-                    btnEditar.className = 'btn-icon';
-                    btnEditar.title = 'Editar';
-                    btnEditar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
-                    // aquí luego le añadimos lógica de edición
-                    tdAcciones.appendChild(btnEditar);
-
-                    const btnEliminar = document.createElement('button');
-                    btnEliminar.type = 'button';
-                    btnEliminar.className = 'btn-icon btn-icon-danger';
-                    btnEliminar.title = 'Eliminar';
-                    btnEliminar.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
-                    // aquí luego le añadimos lógica de eliminación
-                    tdAcciones.appendChild(btnEliminar);
-
-                    tr.appendChild(tdAcciones);
-
-                    tbody.appendChild(tr);
-                });
-
-            } catch (err) {
-                console.error(err);
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="empty-row">Error al cargar usuarios.</td>
-                    </tr>`;
-            }
+    // ==================================================
+    // FORMATEAR FECHA
+    // ==================================================
+    function formatearFecha(fechaValor) {
+        if (!fechaValor) {
+            return '--/--/----';
         }
 
-        // Formatear rol para mostrar más bonito
-        function formatearRol(rol) {
-            switch (rol) {
-                case 'admin': return 'Administrador';
-                case 'ventas': return 'Ventas';
-                case 'bodega': return 'Bodega / Inventario';
-                case 'cobros': return 'Cobros / Créditos';
-                default: return rol;
-            }
+        const fecha = new Date(fechaValor);
+
+        if (Number.isNaN(fecha.getTime())) {
+            return '--/--/----';
         }
 
-        // Manejo del submit del formulario
-        if (form) {
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const anio = fecha.getFullYear();
+        const hora = String(fecha.getHours()).padStart(2, '0');
+        const minuto = String(fecha.getMinutes()).padStart(2, '0');
 
-                const nombre_completo = document.getElementById('nombre_completo').value.trim();
-                const usuario = document.getElementById('usuario').value.trim();
-                const correo = document.getElementById('correo').value.trim();
-                const rol = document.getElementById('rol').value;
-                const password = document.getElementById('password').value;
-                const password_confirm = document.getElementById('password_confirm').value;
-                const estado = document.getElementById('estado').value;
-                const debe_cambiar_password = document.getElementById('cambiar_password').checked;
+        return `${dia}/${mes}/${anio} ${hora}:${minuto}`;
+    }
 
-                if (!nombre_completo || !usuario || !rol || !password || !password_confirm) {
-                    alert('Por favor completa los campos obligatorios.');
-                    return;
-                }
+    // ==================================================
+    // LEER RESPUESTA JSON
+    // ==================================================
+    async function leerRespuesta(respuesta) {
+        try {
+            return await respuesta.json();
+        } catch (error) {
+            return {};
+        }
+    }
 
-                if (password !== password_confirm) {
-                    alert('Las contraseñas no coinciden.');
-                    return;
-                }
+    // ==================================================
+    // CARGAR USUARIOS
+    // ==================================================
+    async function cargarUsuarios() {
+        if (!tbody) {
+            return;
+        }
 
-                try {
-                    const res = await fetch(`${API_BASE}/api/usuarios`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            nombre_completo,
-                            usuario,
-                            correo,
-                            rol,
-                            password,
-                            password_confirm,
-                            estado,
-                            debe_cambiar_password
-                        })
-                    });
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-row">
+                    Cargando usuarios...
+                </td>
+            </tr>
+        `;
 
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        alert(data.message || 'Error al guardar el usuario.');
-                        return;
-                    }
-
-                    alert('Usuario registrado correctamente.');
-                    form.reset();
-                    // dejar estado en activo por defecto
-                    const estadoSelect = document.getElementById('estado');
-                    if (estadoSelect) estadoSelect.value = 'activo';
-
-                    await cargarUsuarios();
-
-                } catch (err) {
-                    console.error(err);
-                    alert('Error de comunicación con el servidor.');
+        try {
+            const respuesta = await fetch(USUARIOS_URL, {
+                method: 'GET',
+                headers: {
+                    Accept: 'application/json'
                 }
             });
+
+            const usuarios = await leerRespuesta(respuesta);
+
+            if (!respuesta.ok) {
+                throw new Error(
+                    usuarios.message ||
+                    'Error al obtener los usuarios.'
+                );
+            }
+
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(usuarios) || usuarios.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-row">
+                            Sin usuarios registrados aún.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            usuarios.forEach((usuarioData) => {
+                const fila = document.createElement('tr');
+
+                // Usuario
+                const tdUsuario = document.createElement('td');
+                tdUsuario.textContent = usuarioData.usuario || '';
+                fila.appendChild(tdUsuario);
+
+                // Nombre completo
+                const tdNombre = document.createElement('td');
+                tdNombre.textContent =
+                    usuarioData.nombre_completo || '';
+                fila.appendChild(tdNombre);
+
+                // Rol
+                const tdRol = document.createElement('td');
+                tdRol.textContent = formatearRol(usuarioData.rol);
+                fila.appendChild(tdRol);
+
+                // Estado
+                const tdEstado = document.createElement('td');
+                const spanEstado = document.createElement('span');
+
+                spanEstado.classList.add('badge');
+
+                if (usuarioData.estado === 'activo') {
+                    spanEstado.classList.add('badge-success');
+                    spanEstado.textContent = 'Activo';
+                } else {
+                    spanEstado.classList.add('badge-danger');
+                    spanEstado.textContent = 'Inactivo';
+                }
+
+                tdEstado.appendChild(spanEstado);
+                fila.appendChild(tdEstado);
+
+                // Último acceso
+                const tdAcceso = document.createElement('td');
+                tdAcceso.textContent = formatearFecha(
+                    usuarioData.ultimo_acceso
+                );
+                fila.appendChild(tdAcceso);
+
+                // Acciones
+                const tdAcciones = document.createElement('td');
+                tdAcciones.classList.add('tabla-acciones');
+
+                // Botón editar
+                const btnEditar = document.createElement('button');
+                btnEditar.type = 'button';
+                btnEditar.className = 'btn-icon';
+                btnEditar.title = 'Editar';
+                btnEditar.setAttribute(
+                    'aria-label',
+                    `Editar usuario ${usuarioData.usuario}`
+                );
+
+                btnEditar.innerHTML = `
+                    <i class="fa-solid fa-pen-to-square"></i>
+                `;
+
+                tdAcciones.appendChild(btnEditar);
+
+                // Botón eliminar
+                const btnEliminar = document.createElement('button');
+                btnEliminar.type = 'button';
+                btnEliminar.className =
+                    'btn-icon btn-icon-danger';
+
+                btnEliminar.title = 'Eliminar';
+                btnEliminar.setAttribute(
+                    'aria-label',
+                    `Eliminar usuario ${usuarioData.usuario}`
+                );
+
+                btnEliminar.innerHTML = `
+                    <i class="fa-solid fa-trash-can"></i>
+                `;
+
+                btnEliminar.addEventListener('click', async () => {
+                    await eliminarUsuario(
+                        usuarioData.id_usuario,
+                        usuarioData.usuario,
+                        btnEliminar
+                    );
+                });
+
+                tdAcciones.appendChild(btnEliminar);
+
+                fila.appendChild(tdAcciones);
+                tbody.appendChild(fila);
+            });
+
+        } catch (error) {
+            console.error('Error al cargar usuarios:', error);
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-row">
+                        ${error.message || 'Error al cargar usuarios.'}
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // ==================================================
+    // ELIMINAR USUARIO
+    // ==================================================
+    async function eliminarUsuario(
+        idUsuario,
+        nombreUsuario,
+        boton
+    ) {
+        if (!idUsuario) {
+            alert('No se encontró el ID del usuario.');
+            return;
         }
 
-        // Cargar lista de usuarios al entrar a la página
-        cargarUsuarios();
-    });
+        const confirmar = window.confirm(
+            `¿Estás seguro de eliminar al usuario "${nombreUsuario}"?\n\nEsta acción no se puede deshacer.`
+        );
+
+        if (!confirmar) {
+            return;
+        }
+
+        boton.disabled = true;
+
+        const contenidoOriginal = boton.innerHTML;
+
+        boton.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+        `;
+
+        try {
+            const respuesta = await fetch(
+                `${USUARIOS_URL}/${encodeURIComponent(idUsuario)}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        Accept: 'application/json'
+                    }
+                }
+            );
+
+            const data = await leerRespuesta(respuesta);
+
+            if (!respuesta.ok) {
+                alert(
+                    data.message ||
+                    'No se pudo eliminar el usuario.'
+                );
+
+                return;
+            }
+
+            alert(
+                data.message ||
+                'Usuario eliminado correctamente.'
+            );
+
+            await cargarUsuarios();
+
+        } catch (error) {
+            console.error('Error al eliminar usuario:', error);
+
+            alert(
+                'No fue posible comunicarse con el servidor.'
+            );
+
+        } finally {
+            boton.disabled = false;
+            boton.innerHTML = contenidoOriginal;
+        }
+    }
+
+    // ==================================================
+    // REGISTRAR USUARIO
+    // ==================================================
+    if (form) {
+        form.addEventListener('submit', async (evento) => {
+            evento.preventDefault();
+
+            const nombreCompletoInput =
+                document.getElementById('nombre_completo');
+
+            const usuarioInput =
+                document.getElementById('usuario');
+
+            const correoInput =
+                document.getElementById('correo');
+
+            const rolInput =
+                document.getElementById('rol');
+
+            const passwordInput =
+                document.getElementById('password');
+
+            const passwordConfirmInput =
+                document.getElementById('password_confirm');
+
+            const estadoInput =
+                document.getElementById('estado');
+
+            const cambiarPasswordInput =
+                document.getElementById('cambiar_password');
+
+            const nombre_completo =
+                nombreCompletoInput.value.trim();
+
+            const usuario =
+                usuarioInput.value.trim();
+
+            const correo =
+                correoInput.value.trim();
+
+            const rol =
+                rolInput.value;
+
+            const password =
+                passwordInput.value;
+
+            const password_confirm =
+                passwordConfirmInput.value;
+
+            const estado =
+                estadoInput.value;
+
+            const debe_cambiar_password =
+                cambiarPasswordInput.checked;
+
+            // Validar campos obligatorios
+            if (
+                !nombre_completo ||
+                !usuario ||
+                !rol ||
+                !password ||
+                !password_confirm
+            ) {
+                alert(
+                    'Por favor completa los campos obligatorios.'
+                );
+
+                return;
+            }
+
+            // Validar contraseña
+            if (password !== password_confirm) {
+                alert('Las contraseñas no coinciden.');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert(
+                    'La contraseña debe tener al menos 6 caracteres.'
+                );
+
+                return;
+            }
+
+            const botonGuardar = form.querySelector(
+                'button[type="submit"]'
+            );
+
+            if (botonGuardar) {
+                botonGuardar.disabled = true;
+            }
+
+            try {
+                const respuesta = await fetch(USUARIOS_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nombre_completo,
+                        usuario,
+                        correo,
+                        rol,
+                        password,
+                        password_confirm,
+                        estado,
+                        debe_cambiar_password
+                    })
+                });
+
+                const data = await leerRespuesta(respuesta);
+
+                if (!respuesta.ok) {
+                    alert(
+                        data.message ||
+                        'Error al guardar el usuario.'
+                    );
+
+                    return;
+                }
+
+                alert(
+                    data.message ||
+                    'Usuario registrado correctamente.'
+                );
+
+                form.reset();
+
+                // Estado activo por defecto
+                if (estadoInput) {
+                    estadoInput.value = 'activo';
+                }
+
+                await cargarUsuarios();
+
+            } catch (error) {
+                console.error(
+                    'Error al registrar usuario:',
+                    error
+                );
+
+                alert(
+                    'Error de comunicación con el servidor.'
+                );
+
+            } finally {
+                if (botonGuardar) {
+                    botonGuardar.disabled = false;
+                }
+            }
+        });
+    }
+
+    // Cargar usuarios al abrir la página
+    cargarUsuarios();
+});

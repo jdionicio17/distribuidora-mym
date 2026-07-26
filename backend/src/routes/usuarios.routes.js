@@ -1,12 +1,26 @@
-// backend/src/routes/usuarios.routes.js
 const express = require('express');
 const router = express.Router();
-const usuariosController = require('../controllers/usuarios.controller');
 
-// GET /api/usuarios -> listar
-router.get('/', usuariosController.listarUsuarios);
+const usuariosController = require(
+    '../controllers/usuarios.controller'
+);
 
-// POST /api/usuarios -> crear
-router.post('/', usuariosController.crearUsuario);
+// GET /api/usuarios
+router.get(
+    '/',
+    usuariosController.listarUsuarios
+);
+
+// POST /api/usuarios
+router.post(
+    '/',
+    usuariosController.crearUsuario
+);
+
+// DELETE /api/usuarios/:id
+router.delete(
+    '/:id',
+    usuariosController.eliminarUsuario
+);
 
 module.exports = router;
