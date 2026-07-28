@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,322 +10,285 @@
     <link rel="stylesheet" href="css/stylebackend.css">
 
     <!-- Font Awesome 6.5.1 -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-          crossorigin="anonymous"
-          referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
+
 <body class="admin-body">
 
-<div class="admin-layout">
+    <div class="admin-layout">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <span class="sidebar-logo-icon">MyM</span>
-                <div class="sidebar-logo-text">
-                    <h1>Distribuidora MyM</h1>
-                    <p>Panel administrativo</p>
-                </div>
-            </div>
-        </div>
-
-            <nav class="sidebar-nav">
-      <ul>
-        <li>
-          <a href="adminv.html">
-            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
-            <span>Dashboard</span>
-          </a>
-        </li>
-                <li>
-          <a href="vendedorv.html">
-            <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span>
-            <span>Ventas</span>
-          </a>
-        </li>
-
-         <li>
-          <a href="detalle.venta.html">
-            <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
-            <span>Detalle de ventas</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="comprasv.html">
-            <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box"></i></span>
-            <span>Compras</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="clientesv.html">
-            <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
-            <span>Clientes / Créditos</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="inventarioav.html">
-            <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
-            <span>Inventario</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="productosv.html">
-            <span class="nav-icon"><i class="fa-solid fa-hotdog"></i></span>
-            <span>Productos</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="categoriasv.html">
-            <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
-            <span>Categorías</span>
-          </a>
-        </li>
-
-        <li class="active">
-          <a href="proveedoresv.html">
-            <span class="nav-icon"><i class="fa-solid fa-truck-field"></i></span>
-            <span>Proveedores</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="reportesv.html">
-            <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
-            <span>Reportes</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="ctasporcobrarv.html">
-            <span class="nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-            <span>Ctas. por cobrar</span>
-          </a>
-        </li>
-        <li>
-          <a href="ctaspagarv.html">
-            <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
-            <span>Ctas. por pagar</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="rusuario.html">
-            <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
-            <span>Usuarios</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-
-        <div class="sidebar-footer">
-            <small>Distribuidora MyM</small>
-            <small class="muted">Gestión de proveedores y compras</small>
-        </div>
-    </aside>
-
-    <!-- MAIN AREA -->
-    <div class="main-area">
-
-        <!-- TOPBAR -->
-        <header class="topbar">
-            <button class="menu-toggle" id="sidebarToggle">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-
-            <div class="topbar-title">
-                <h2>Gestión de proveedores</h2>
-                <p>Registrar, actualizar y administrar proveedores de Distribuidora MyM.</p>
-            </div>
-
-            <div class="topbar-user">
-                <div class="user-info">
-                    <span class="user-name">Usuario: Admin</span>
-                    <span class="user-role">Distribuidora MyM</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- CONTENIDO -->
-        <main class="content">
-
-            <!-- FORMULARIO: AGREGAR / ACTUALIZAR PROVEEDOR -->
-            <section class="section">
-                <div class="section-header">
-                    <h3>Agregar / Actualizar proveedor</h3>
-                    <p>Completa los datos del proveedor. Puedes registrar nuevos o actualizar existentes.</p>
-                </div>
-
-                <div class="card user-card">
-                    <form class="user-form" id="proveedorForm">
-                        <!-- oculto para actualizar -->
-                        <input type="hidden" id="id_proveedor" name="id_proveedor">
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label for="nombre_proveedor">Nombre del proveedor</label>
-                                <input type="text" id="nombre_proveedor" name="nombre_proveedor"
-                                       placeholder="Ej. Toledo S.A." required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="nombre_contacto">Nombre de contacto</label>
-                                <input type="text" id="nombre_contacto" name="nombre_contacto"
-                                       placeholder="Ej. Juan Pérez">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="telefono">Teléfono principal</label>
-                                <input type="text" id="telefono" name="telefono"
-                                       placeholder="Ej. 5555-5555">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="telefono_alt">Teléfono alterno</label>
-                                <input type="text" id="telefono_alt" name="telefono_alt"
-                                       placeholder="Opcional">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="email">Correo electrónico</label>
-                                <input type="email" id="email" name="email"
-                                       placeholder="correo@proveedor.com">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="nit">NIT</label>
-                                <input type="text" id="nit" name="nit"
-                                       placeholder="Ej. 123456-7">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="ciudad">Ciudad</label>
-                                <input type="text" id="ciudad" name="ciudad"
-                                       placeholder="Ej. San Agustín Acasaguastlán">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="departamento">Departamento</label>
-                                <input type="text" id="departamento" name="departamento"
-                                       placeholder="Ej. El Progreso">
-                            </div>
-
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label for="direccion">Dirección</label>
-                                <input type="text" id="direccion" name="direccion"
-                                       placeholder="Dirección completa del proveedor">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="estado">Estado</label>
-                                <select id="estado" name="estado">
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label for="notas">Notas</label>
-                                <textarea id="notas" name="notas"
-                                          rows="3"
-                                          style="resize: vertical; padding: 0.55rem 0.7rem; border-radius: 0.5rem; border: 1px solid #d1d1d1; font-size: 0.9rem; background:#fafafa; outline:none;"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="reset" class="btn-secondary" id="btnLimpiarProveedor">
-                                <i class="fa-solid fa-rotate-left"></i>&nbsp;Limpiar
-                            </button>
-                            <button type="submit" class="btn-primary" id="btnGuardarProveedor">
-                                <i class="fa-solid fa-truck-field"></i>&nbsp;
-                                Guardar proveedor
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </section>
-
-            <!-- LISTADO DE PROVEEDORES -->
-            <section class="section">
-                <div class="section-header small">
-                    <h3>Proveedores registrados</h3>
-                    <p>Listado de proveedores existentes en el sistema.</p>
-                </div>
-
-                <div class="card table-card">
-                    <div class="table-wrapper">
-                        <table id="tablaProveedores">
-                            <thead>
-                            <tr>
-                                <th>Proveedor</th>
-                                <th>Contacto</th>
-                                <th>Teléfono</th>
-                                <th>Email</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <!-- Estas filas son de ejemplo / luego se llenan con JS desde el backend -->
-                            <tr data-id="1">
-                                <td>Toledo.</td>
-                                <td>Juan Pérez</td>
-                                <td>5555-1234</td>
-                                <td>contacto@toledo.com</td>
-                                <td><span class="badge badge-success">Activo</span></td>
-                                <td class="tabla-acciones">
-                                    <button type="button" class="btn-icon btn-editar" title="Editar">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </button>
-                                    <button type="button" class="btn-icon btn-icon-danger btn-eliminar" title="Eliminar">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr data-id="2">
-                                <td>Distribuidora El Norte</td>
-                                <td>María López</td>
-                                <td>5555-9876</td>
-                                <td>ventas@norte.com</td>
-                                <td><span class="badge badge-danger">Inactivo</span></td>
-                                <td class="tabla-acciones">
-                                    <button type="button" class="btn-icon btn-editar" title="Editar">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </button>
-                                    <button type="button" class="btn-icon btn-icon-danger btn-eliminar" title="Eliminar">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <!-- Cuando conectes backend, este tbody se llenará dinámicamente -->
-                            </tbody>
-                        </table>
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">MyM</span>
+                    <div class="sidebar-logo-text">
+                        <h1>Distribuidora MyM</h1>
+                        <p>Panel administrativo</p>
                     </div>
                 </div>
-            </section>
+            </div>
 
-        </main>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="adminv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="vendedorv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span>
+                            <span>Ventas</span>
+                        </a>
+                    </li>
 
-        <!-- FOOTER -->
-        <footer class="admin-footer">
-            <span>&copy; <span id="year"></span> Distribuidora MyM</span>
-            <span class="footer-separator">|</span>
-            <span>Módulo de proveedores</span>
-        </footer>
+                    <li>
+                        <a href="detalle.venta.html">
+                            <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
+                            <span>Detalle de ventas</span>
+                        </a>
+                    </li>
 
+                    <li>
+                        <a href="comprasv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box"></i></span>
+                            <span>Compras</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="clientesv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+                            <span>Clientes / Créditos</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="inventarioav.html">
+                            <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
+                            <span>Inventario</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="productosv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-hotdog"></i></span>
+                            <span>Productos</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="categoriasv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
+                            <span>Categorías</span>
+                        </a>
+                    </li>
+
+                    <li class="active">
+                        <a href="proveedoresv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-truck-field"></i></span>
+                            <span>Proveedores</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="reportesv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="ctasporcobrarv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                            <span>Ctas. por cobrar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="ctaspagarv.html">
+                            <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                            <span>Ctas. por pagar</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="rusuario.html">
+                            <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+                            <span>Usuarios</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <small>Distribuidora MyM</small>
+                <small class="muted">Gestión de proveedores y compras</small>
+            </div>
+        </aside>
+
+        <!-- MAIN AREA -->
+        <div class="main-area">
+
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <button class="menu-toggle" id="sidebarToggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <div class="topbar-title">
+                    <h2>Gestión de proveedores</h2>
+                    <p>Registrar, actualizar y administrar proveedores de Distribuidora MyM.</p>
+                </div>
+
+                <div class="topbar-user">
+                    <div class="user-info">
+                        <span class="user-name">Usuario: Admin</span>
+                        <span class="user-role">Distribuidora MyM</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CONTENIDO -->
+            <main class="content">
+
+                <!-- FORMULARIO: AGREGAR / ACTUALIZAR PROVEEDOR -->
+                <section class="section">
+                    <div class="section-header">
+                        <h3>Agregar / Actualizar proveedor</h3>
+                        <p>Completa los datos del proveedor. Puedes registrar nuevos o actualizar existentes.</p>
+                    </div>
+
+                    <div class="card user-card">
+                        <form class="user-form" id="proveedorForm">
+                            <!-- oculto para actualizar -->
+                            <input type="hidden" id="id_proveedor" name="id_proveedor">
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label for="nombre_proveedor">Nombre del proveedor</label>
+                                    <input type="text" id="nombre_proveedor" name="nombre_proveedor"
+                                        placeholder="Ej. Toledo S.A." required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="nombre_contacto">Nombre de contacto</label>
+                                    <input type="text" id="nombre_contacto" name="nombre_contacto"
+                                        placeholder="Ej. Juan Pérez">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono principal</label>
+                                    <input type="text" id="telefono" name="telefono" placeholder="Ej. 5555-5555">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="telefono_alt">Teléfono alterno</label>
+                                    <input type="text" id="telefono_alt" name="telefono_alt" placeholder="Opcional">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email">Correo electrónico</label>
+                                    <input type="email" id="email" name="email" placeholder="correo@proveedor.com">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="nit">NIT</label>
+                                    <input type="text" id="nit" name="nit" placeholder="Ej. 123456-7">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ciudad">Ciudad</label>
+                                    <input type="text" id="ciudad" name="ciudad"
+                                        placeholder="Ej. San Agustín Acasaguastlán">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="departamento">Departamento</label>
+                                    <input type="text" id="departamento" name="departamento"
+                                        placeholder="Ej. El Progreso">
+                                </div>
+
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label for="direccion">Dirección</label>
+                                    <input type="text" id="direccion" name="direccion"
+                                        placeholder="Dirección completa del proveedor">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="estado">Estado</label>
+                                    <select id="estado" name="estado">
+                                        <option value="activo">Activo</option>
+                                        <option value="inactivo">Inactivo</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label for="notas">Notas</label>
+                                    <textarea id="notas" name="notas" rows="3"
+                                        style="resize: vertical; padding: 0.55rem 0.7rem; border-radius: 0.5rem; border: 1px solid #d1d1d1; font-size: 0.9rem; background:#fafafa; outline:none;"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="reset" class="btn-secondary" id="btnLimpiarProveedor">
+                                    <i class="fa-solid fa-rotate-left"></i>&nbsp;Limpiar
+                                </button>
+                                <button type="submit" class="btn-primary" id="btnGuardarProveedor">
+                                    <i class="fa-solid fa-truck-field"></i>&nbsp;
+                                    Guardar proveedor
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- LISTADO DE PROVEEDORES -->
+                <section class="section">
+                    <div class="section-header small">
+                        <h3>Proveedores registrados</h3>
+                        <p>Listado de proveedores existentes en el sistema.</p>
+                    </div>
+
+                    <div class="card table-card">
+                        <div class="table-wrapper">
+                            <table id="tablaProveedores">
+                                <thead>
+                                    <tr>
+                                        <th>Proveedor</th>
+                                        <th>Contacto</th>
+                                        <th>Teléfono</th>
+                                        <th>Email</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- FOOTER -->
+            <footer class="admin-footer">
+                <span>&copy; <span id="year"></span> Distribuidora MyM</span>
+                <span class="footer-separator">|</span>
+                <span>Módulo de proveedores</span>
+            </footer>
+
+        </div>
     </div>
-</div>
 
-<script src="js/config.js"></script>
-<script src="js/proveedoresv.js"> </script>
+    <script src="js/config.js"></script>
+    <script src="js/proveedoresv.js"> </script>
 
 
 </body>
+
 </html>

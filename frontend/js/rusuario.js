@@ -9,14 +9,66 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('.user-form');
     const tbody = document.getElementById('usuarios-tbody');
 
-    // API_BASE debe encontrarse en config.js
-    // Si API_BASE no existe, utiliza la misma dirección del frontend
+    const nombreCompletoInput =
+        document.getElementById('nombre_completo');
+
+    const usuarioInput =
+        document.getElementById('usuario');
+
+    const correoInput =
+        document.getElementById('correo');
+
+    const rolInput =
+        document.getElementById('rol');
+
+    const passwordInput =
+        document.getElementById('password');
+
+    const passwordConfirmInput =
+        document.getElementById('password_confirm');
+
+    const estadoInput =
+        document.getElementById('estado');
+
+    const cambiarPasswordInput =
+        document.getElementById('cambiar_password');
+
+    const botonGuardar = form
+        ? form.querySelector('button[type="submit"]')
+        : null;
+
+    const botonLimpiar = form
+        ? form.querySelector('button[type="reset"]')
+        : null;
+
+    const tituloFormulario =
+        document.querySelector(
+            '.section .section-header h3'
+        );
+
+    const descripcionFormulario =
+        document.querySelector(
+            '.section .section-header p'
+        );
+
+    const labelPassword =
+        document.querySelector('label[for="password"]');
+
+    const labelPasswordConfirm =
+        document.querySelector(
+            'label[for="password_confirm"]'
+        );
+
+    let idUsuarioEditando = null;
+
+    // Quitar barras finales a API_BASE
     const BASE_URL =
         typeof API_BASE !== 'undefined'
             ? String(API_BASE).replace(/\/+$/, '')
             : '';
 
     const USUARIOS_URL = `${BASE_URL}/api/usuarios`;
+
 
     // ==================================================
     // SIDEBAR
@@ -27,12 +79,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
     // ==================================================
     // AÑO DEL FOOTER
     // ==================================================
     if (yearSpan) {
         yearSpan.textContent = new Date().getFullYear();
     }
+
+
+    // ==================================================
+    // LEER RESPUESTA JSON
+    // ==================================================
+    async function leerRespuesta(respuesta) {
+        try {
+            return await respuesta.json();
+        } catch (error) {
+            return {};
+        }
+    }
+
 
     // ==================================================
     // FORMATEAR ROL
@@ -56,39 +122,180 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     // ==================================================
     // FORMATEAR FECHA
     // ==================================================
-    function formatearFecha(fechaValor) {
-        if (!fechaValor) {
+    function formatearFecha(valor) {
+        if (!valor) {
             return '--/--/----';
         }
 
-        const fecha = new Date(fechaValor);
+        const fecha = new Date(valor);
 
         if (Number.isNaN(fecha.getTime())) {
             return '--/--/----';
         }
 
-        const dia = String(fecha.getDate()).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const dia = String(
+            fecha.getDate()
+        ).padStart(2, '0');
+
+        const mes = String(
+            fecha.getMonth() + 1
+        ).padStart(2, '0');
+
         const anio = fecha.getFullYear();
-        const hora = String(fecha.getHours()).padStart(2, '0');
-        const minuto = String(fecha.getMinutes()).padStart(2, '0');
+
+        const hora = String(
+            fecha.getHours()
+        ).padStart(2, '0');
+
+        const minuto = String(
+            fecha.getMinutes()
+        ).padStart(2, '0');
 
         return `${dia}/${mes}/${anio} ${hora}:${minuto}`;
     }
 
+
     // ==================================================
-    // LEER RESPUESTA JSON
+    // ACTIVAR MODO CREACIÓN
     // ==================================================
-    async function leerRespuesta(respuesta) {
-        try {
-            return await respuesta.json();
-        } catch (error) {
-            return {};
+    function activarModoCreacion() {
+        idUsuarioEditando = null;
+
+        if (form) {
+            form.reset();
+        }
+
+        if (estadoInput) {
+            estadoInput.value = 'activo';
+        }
+
+        if (passwordInput) {
+            passwordInput.required = true;
+            passwordInput.placeholder = '';
+        }
+
+        if (passwordConfirmInput) {
+            passwordConfirmInput.required = true;
+            passwordConfirmInput.placeholder = '';
+        }
+
+        if (tituloFormulario) {
+            tituloFormulario.textContent = 'Registrar usuario';
+        }
+
+        if (descripcionFormulario) {
+            descripcionFormulario.textContent =
+                'Completa la información para crear un nuevo usuario del sistema.';
+        }
+
+        if (labelPassword) {
+            labelPassword.textContent = 'Contraseña';
+        }
+
+        if (labelPasswordConfirm) {
+            labelPasswordConfirm.textContent =
+                'Confirmar contraseña';
+        }
+
+        if (botonGuardar) {
+            botonGuardar.innerHTML = `
+                <i class="fa-solid fa-user-plus"></i>
+                &nbsp;Guardar usuario
+            `;
+        }
+
+        if (botonLimpiar) {
+            botonLimpiar.innerHTML = `
+                <i class="fa-solid fa-rotate-left"></i>
+                &nbsp;Limpiar
+            `;
         }
     }
+
+
+    // ==================================================
+    // ACTIVAR MODO EDICIÓN
+    // ==================================================
+    function activarModoEdicion(usuarioData) {
+        idUsuarioEditando = usuarioData.id_usuario;
+
+        nombreCompletoInput.value =
+            usuarioData.nombre_completo || '';
+
+        usuarioInput.value =
+            usuarioData.usuario || '';
+
+        correoInput.value =
+            usuarioData.correo || '';
+
+        rolInput.value =
+            usuarioData.rol || '';
+
+        estadoInput.value =
+            usuarioData.estado || 'activo';
+
+        cambiarPasswordInput.checked =
+            Number(usuarioData.debe_cambiar_password) === 1;
+
+        // La contraseña no se devuelve desde el backend
+        passwordInput.value = '';
+        passwordConfirmInput.value = '';
+
+        // Durante la edición, cambiar contraseña es opcional
+        passwordInput.required = false;
+        passwordConfirmInput.required = false;
+
+        passwordInput.placeholder =
+            'Dejar vacío para conservar la contraseña';
+
+        passwordConfirmInput.placeholder =
+            'Dejar vacío para conservar la contraseña';
+
+        if (tituloFormulario) {
+            tituloFormulario.textContent = 'Editar usuario';
+        }
+
+        if (descripcionFormulario) {
+            descripcionFormulario.textContent =
+                `Modificando el usuario "${usuarioData.usuario}".`;
+        }
+
+        if (labelPassword) {
+            labelPassword.textContent =
+                'Nueva contraseña (opcional)';
+        }
+
+        if (labelPasswordConfirm) {
+            labelPasswordConfirm.textContent =
+                'Confirmar nueva contraseña';
+        }
+
+        if (botonGuardar) {
+            botonGuardar.innerHTML = `
+                <i class="fa-solid fa-floppy-disk"></i>
+                &nbsp;Actualizar usuario
+            `;
+        }
+
+        if (botonLimpiar) {
+            botonLimpiar.innerHTML = `
+                <i class="fa-solid fa-xmark"></i>
+                &nbsp;Cancelar edición
+            `;
+        }
+
+        form.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+
+        nombreCompletoInput.focus();
+    }
+
 
     // ==================================================
     // CARGAR USUARIOS
@@ -125,7 +332,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tbody.innerHTML = '';
 
-            if (!Array.isArray(usuarios) || usuarios.length === 0) {
+            if (
+                !Array.isArray(usuarios) ||
+                usuarios.length === 0
+            ) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="6" class="empty-row">
@@ -142,31 +352,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Usuario
                 const tdUsuario = document.createElement('td');
-                tdUsuario.textContent = usuarioData.usuario || '';
+
+                tdUsuario.textContent =
+                    usuarioData.usuario || '';
+
                 fila.appendChild(tdUsuario);
 
                 // Nombre completo
                 const tdNombre = document.createElement('td');
+
                 tdNombre.textContent =
                     usuarioData.nombre_completo || '';
+
                 fila.appendChild(tdNombre);
 
                 // Rol
                 const tdRol = document.createElement('td');
-                tdRol.textContent = formatearRol(usuarioData.rol);
+
+                tdRol.textContent =
+                    formatearRol(usuarioData.rol);
+
                 fila.appendChild(tdRol);
 
                 // Estado
                 const tdEstado = document.createElement('td');
-                const spanEstado = document.createElement('span');
+
+                const spanEstado =
+                    document.createElement('span');
 
                 spanEstado.classList.add('badge');
 
                 if (usuarioData.estado === 'activo') {
-                    spanEstado.classList.add('badge-success');
+                    spanEstado.classList.add(
+                        'badge-success'
+                    );
+
                     spanEstado.textContent = 'Activo';
+
                 } else {
-                    spanEstado.classList.add('badge-danger');
+                    spanEstado.classList.add(
+                        'badge-danger'
+                    );
+
                     spanEstado.textContent = 'Inactivo';
                 }
 
@@ -175,20 +402,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Último acceso
                 const tdAcceso = document.createElement('td');
-                tdAcceso.textContent = formatearFecha(
-                    usuarioData.ultimo_acceso
-                );
+
+                tdAcceso.textContent =
+                    formatearFecha(
+                        usuarioData.ultimo_acceso
+                    );
+
                 fila.appendChild(tdAcceso);
 
                 // Acciones
-                const tdAcciones = document.createElement('td');
-                tdAcciones.classList.add('tabla-acciones');
+                const tdAcciones =
+                    document.createElement('td');
+
+                tdAcciones.classList.add(
+                    'tabla-acciones'
+                );
 
                 // Botón editar
-                const btnEditar = document.createElement('button');
+                const btnEditar =
+                    document.createElement('button');
+
                 btnEditar.type = 'button';
                 btnEditar.className = 'btn-icon';
                 btnEditar.title = 'Editar';
+
                 btnEditar.setAttribute(
                     'aria-label',
                     `Editar usuario ${usuarioData.usuario}`
@@ -198,15 +435,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i class="fa-solid fa-pen-to-square"></i>
                 `;
 
+                btnEditar.addEventListener('click', () => {
+                    activarModoEdicion(usuarioData);
+                });
+
                 tdAcciones.appendChild(btnEditar);
 
                 // Botón eliminar
-                const btnEliminar = document.createElement('button');
+                const btnEliminar =
+                    document.createElement('button');
+
                 btnEliminar.type = 'button';
+
                 btnEliminar.className =
                     'btn-icon btn-icon-danger';
 
                 btnEliminar.title = 'Eliminar';
+
                 btnEliminar.setAttribute(
                     'aria-label',
                     `Eliminar usuario ${usuarioData.usuario}`
@@ -216,13 +461,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i class="fa-solid fa-trash-can"></i>
                 `;
 
-                btnEliminar.addEventListener('click', async () => {
-                    await eliminarUsuario(
-                        usuarioData.id_usuario,
-                        usuarioData.usuario,
-                        btnEliminar
-                    );
-                });
+                btnEliminar.addEventListener(
+                    'click',
+                    async () => {
+                        await eliminarUsuario(
+                            usuarioData.id_usuario,
+                            usuarioData.usuario,
+                            btnEliminar
+                        );
+                    }
+                );
 
                 tdAcciones.appendChild(btnEliminar);
 
@@ -231,17 +479,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
         } catch (error) {
-            console.error('Error al cargar usuarios:', error);
+            console.error(
+                'Error al cargar usuarios:',
+                error
+            );
 
             tbody.innerHTML = `
                 <tr>
                     <td colspan="6" class="empty-row">
-                        ${error.message || 'Error al cargar usuarios.'}
+                        ${error.message ||
+                'Error al cargar usuarios.'
+                }
                     </td>
                 </tr>
             `;
         }
     }
+
 
     // ==================================================
     // ELIMINAR USUARIO
@@ -264,9 +518,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        boton.disabled = true;
-
         const contenidoOriginal = boton.innerHTML;
+
+        boton.disabled = true;
 
         boton.innerHTML = `
             <i class="fa-solid fa-spinner fa-spin"></i>
@@ -299,10 +553,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Usuario eliminado correctamente.'
             );
 
+            if (idUsuarioEditando === idUsuario) {
+                activarModoCreacion();
+            }
+
             await cargarUsuarios();
 
         } catch (error) {
-            console.error('Error al eliminar usuario:', error);
+            console.error(
+                'Error al eliminar usuario:',
+                error
+            );
 
             alert(
                 'No fue posible comunicarse con el servidor.'
@@ -314,36 +575,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     // ==================================================
-    // REGISTRAR USUARIO
+    // GUARDAR O ACTUALIZAR USUARIO
     // ==================================================
     if (form) {
         form.addEventListener('submit', async (evento) => {
             evento.preventDefault();
-
-            const nombreCompletoInput =
-                document.getElementById('nombre_completo');
-
-            const usuarioInput =
-                document.getElementById('usuario');
-
-            const correoInput =
-                document.getElementById('correo');
-
-            const rolInput =
-                document.getElementById('rol');
-
-            const passwordInput =
-                document.getElementById('password');
-
-            const passwordConfirmInput =
-                document.getElementById('password_confirm');
-
-            const estadoInput =
-                document.getElementById('estado');
-
-            const cambiarPasswordInput =
-                document.getElementById('cambiar_password');
 
             const nombre_completo =
                 nombreCompletoInput.value.trim();
@@ -369,13 +607,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const debe_cambiar_password =
                 cambiarPasswordInput.checked;
 
-            // Validar campos obligatorios
+            const estaEditando =
+                idUsuarioEditando !== null;
+
             if (
                 !nombre_completo ||
                 !usuario ||
                 !rol ||
-                !password ||
-                !password_confirm
+                !estado
             ) {
                 alert(
                     'Por favor completa los campos obligatorios.'
@@ -384,13 +623,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Validar contraseña
-            if (password !== password_confirm) {
+            // Al crear, la contraseña es obligatoria
+            if (
+                !estaEditando &&
+                (!password || !password_confirm)
+            ) {
+                alert(
+                    'Debes escribir y confirmar la contraseña.'
+                );
+
+                return;
+            }
+
+            // Al editar, solo validar contraseña cuando se escribió
+            const intentaCambiarPassword =
+                password !== '' ||
+                password_confirm !== '';
+
+            if (
+                intentaCambiarPassword &&
+                (!password || !password_confirm)
+            ) {
+                alert(
+                    'Debes escribir y confirmar la nueva contraseña.'
+                );
+
+                return;
+            }
+
+            if (
+                intentaCambiarPassword &&
+                password !== password_confirm
+            ) {
                 alert('Las contraseñas no coinciden.');
                 return;
             }
 
-            if (password.length < 6) {
+            if (
+                intentaCambiarPassword &&
+                password.length < 6
+            ) {
                 alert(
                     'La contraseña debe tener al menos 6 caracteres.'
                 );
@@ -398,17 +670,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const botonGuardar = form.querySelector(
-                'button[type="submit"]'
-            );
+            const metodo = estaEditando
+                ? 'PUT'
+                : 'POST';
 
-            if (botonGuardar) {
-                botonGuardar.disabled = true;
-            }
+            const url = estaEditando
+                ? `${USUARIOS_URL}/${encodeURIComponent(idUsuarioEditando)}`
+                : USUARIOS_URL;
+
+            const contenidoOriginal =
+                botonGuardar.innerHTML;
+
+            botonGuardar.disabled = true;
+
+            botonGuardar.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                &nbsp;Guardando...
+            `;
 
             try {
-                const respuesta = await fetch(USUARIOS_URL, {
-                    method: 'POST',
+                const respuesta = await fetch(url, {
+                    method: metodo,
                     headers: {
                         'Content-Type': 'application/json',
                         Accept: 'application/json'
@@ -425,12 +707,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     })
                 });
 
-                const data = await leerRespuesta(respuesta);
+                const data =
+                    await leerRespuesta(respuesta);
 
                 if (!respuesta.ok) {
                     alert(
                         data.message ||
-                        'Error al guardar el usuario.'
+                        'No se pudo guardar el usuario.'
                     );
 
                     return;
@@ -438,21 +721,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 alert(
                     data.message ||
-                    'Usuario registrado correctamente.'
+                    (
+                        estaEditando
+                            ? 'Usuario actualizado correctamente.'
+                            : 'Usuario registrado correctamente.'
+                    )
                 );
 
-                form.reset();
-
-                // Estado activo por defecto
-                if (estadoInput) {
-                    estadoInput.value = 'activo';
-                }
-
+                activarModoCreacion();
                 await cargarUsuarios();
 
             } catch (error) {
                 console.error(
-                    'Error al registrar usuario:',
+                    'Error al guardar usuario:',
                     error
                 );
 
@@ -461,13 +742,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
 
             } finally {
-                if (botonGuardar) {
-                    botonGuardar.disabled = false;
+                botonGuardar.disabled = false;
+
+                if (idUsuarioEditando === null) {
+                    botonGuardar.innerHTML = `
+                        <i class="fa-solid fa-user-plus"></i>
+                        &nbsp;Guardar usuario
+                    `;
+                } else {
+                    botonGuardar.innerHTML =
+                        contenidoOriginal;
                 }
             }
         });
+
+
+        // Botón limpiar o cancelar edición
+        form.addEventListener('reset', () => {
+            window.setTimeout(() => {
+                activarModoCreacion();
+            }, 0);
+        });
     }
 
-    // Cargar usuarios al abrir la página
+
+    // ==================================================
+    // INICIO
+    // ==================================================
+    activarModoCreacion();
     cargarUsuarios();
 });

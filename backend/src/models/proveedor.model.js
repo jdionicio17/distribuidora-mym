@@ -1,171 +1,215 @@
-// backend/src/models/proveedor.model.js
 const db = require('../config/db');
 
-// Obtener todos los proveedores
+// =====================================================
+// OBTENER TODOS LOS PROVEEDORES
+// =====================================================
 async function getAllProveedores() {
-  const [rows] = await db.query(
-    `SELECT 
-        id_proveedor,
-        nombre_proveedor,
-        nombre_contacto,
-        telefono,
-        telefono_alt,
-        email,
-        nit,
-        ciudad,
-        departamento,
-        direccion,
-        estado,
-        notas,
-        creado_en,
-        actualizado_en
-     FROM proveedores
-     ORDER BY nombre_proveedor ASC`
-  );
+  const [rows] = await db.query(`
+        SELECT
+            id_proveedor,
+            nombre_proveedor,
+            nombre_contacto,
+            telefono,
+            telefono_alt,
+            email,
+            nit,
+            ciudad,
+            departamento,
+            direccion,
+            estado,
+            notas,
+            creado_en,
+            actualizado_en
+        FROM proveedores
+        ORDER BY nombre_proveedor ASC
+    `);
+
   return rows;
 }
 
-// Obtener un proveedor por ID
-async function getProveedorById(id) {
+
+// =====================================================
+// OBTENER PROVEEDOR POR ID
+// =====================================================
+async function getProveedorById(idProveedor) {
   const [rows] = await db.query(
-    `SELECT 
-        id_proveedor,
-        nombre_proveedor,
-        nombre_contacto,
-        telefono,
-        telefono_alt,
-        email,
-        nit,
-        ciudad,
-        departamento,
-        direccion,
-        estado,
-        notas,
-        creado_en,
-        actualizado_en
-     FROM proveedores
-     WHERE id_proveedor = ?`,
-    [id]
+    `
+        SELECT
+            id_proveedor,
+            nombre_proveedor,
+            nombre_contacto,
+            telefono,
+            telefono_alt,
+            email,
+            nit,
+            ciudad,
+            departamento,
+            direccion,
+            estado,
+            notas,
+            creado_en,
+            actualizado_en
+        FROM proveedores
+        WHERE id_proveedor = ?
+        LIMIT 1
+        `,
+    [idProveedor]
   );
+
   return rows[0] || null;
 }
 
-// Crear proveedor
+
+// =====================================================
+// BUSCAR CORREO O NIT DUPLICADO
+// =====================================================
+async function buscarDuplicado({
+  email,
+  nit,
+  excluirId = null
+}) {
+  const condiciones = [];
+  const parametros = [];
+
+  if (email) {
+    condiciones.push('email = ?');
+    parametros.push(email);
+  }
+
+  if (nit) {
+    condiciones.push('nit = ?');
+    parametros.push(nit);
+  }
+
+  if (condiciones.length === 0) {
+    return null;
+  }
+
+  let sql = `
+        SELECT
+            id_proveedor,
+            nombre_proveedor,
+            email,
+            nit
+        FROM proveedores
+        WHERE (${condiciones.join(' OR ')})
+    `;
+
+  if (excluirId) {
+    sql += ' AND id_proveedor <> ?';
+    parametros.push(excluirId);
+  }
+
+  sql += ' LIMIT 1';
+
+  const [rows] = await db.query(sql, parametros);
+
+  return rows[0] || null;
+}
+
+
+// =====================================================
+// CREAR PROVEEDOR
+// =====================================================
 async function createProveedor(data) {
-  const {
-    nombre_proveedor,
-    nombre_contacto,
-    telefono,
-    telefono_alt,
-    email,
-    nit,
-    ciudad,
-    departamento,
-    direccion,
-    estado = 'activo',
-    notas
-  } = data;
-
   const [result] = await db.query(
-    `INSERT INTO proveedores (
-        nombre_proveedor,
-        nombre_contacto,
-        telefono,
-        telefono_alt,
-        email,
-        nit,
-        ciudad,
-        departamento,
-        direccion,
-        estado,
-        notas
-     ) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+    `
+        INSERT INTO proveedores (
+            nombre_proveedor,
+            nombre_contacto,
+            telefono,
+            telefono_alt,
+            email,
+            nit,
+            ciudad,
+            departamento,
+            direccion,
+            estado,
+            notas
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
     [
-      nombre_proveedor,
-      nombre_contacto || null,
-      telefono || null,
-      telefono_alt || null,
-      email || null,
-      nit || null,
-      ciudad || null,
-      departamento || null,
-      direccion || null,
-      estado || 'activo',
-      notas || null
+      data.nombre_proveedor,
+      data.nombre_contacto,
+      data.telefono,
+      data.telefono_alt,
+      data.email,
+      data.nit,
+      data.ciudad,
+      data.departamento,
+      data.direccion,
+      data.estado,
+      data.notas
     ]
   );
 
-  // devolvemos el registro recién creado
-  return await getProveedorById(result.insertId);
+  return getProveedorById(result.insertId);
 }
 
-// Actualizar proveedor
-async function updateProveedor(id, data) {
-  const proveedorActual = await getProveedorById(id);
-  if (!proveedorActual) return null;
 
-  const {
-    nombre_proveedor,
-    nombre_contacto,
-    telefono,
-    telefono_alt,
-    email,
-    nit,
-    ciudad,
-    departamento,
-    direccion,
-    estado,
-    notas
-  } = data;
-
-  const [result] = await db.query(
-    `UPDATE proveedores
-     SET 
-        nombre_proveedor   = ?,
-        nombre_contacto    = ?,
-        telefono           = ?,
-        telefono_alt       = ?,
-        email              = ?,
-        nit                = ?,
-        ciudad             = ?,
-        departamento       = ?,
-        direccion          = ?,
-        estado             = ?,
-        notas              = ?
-     WHERE id_proveedor = ?`,
+// =====================================================
+// ACTUALIZAR PROVEEDOR
+// =====================================================
+async function updateProveedor(idProveedor, data) {
+  await db.query(
+    `
+        UPDATE proveedores
+        SET
+            nombre_proveedor = ?,
+            nombre_contacto = ?,
+            telefono = ?,
+            telefono_alt = ?,
+            email = ?,
+            nit = ?,
+            ciudad = ?,
+            departamento = ?,
+            direccion = ?,
+            estado = ?,
+            notas = ?,
+            actualizado_en = CURRENT_TIMESTAMP
+        WHERE id_proveedor = ?
+        `,
     [
-      nombre_proveedor   ?? proveedorActual.nombre_proveedor,
-      nombre_contacto    ?? proveedorActual.nombre_contacto,
-      telefono           ?? proveedorActual.telefono,
-      telefono_alt       ?? proveedorActual.telefono_alt,
-      email              ?? proveedorActual.email,
-      nit                ?? proveedorActual.nit,
-      ciudad             ?? proveedorActual.ciudad,
-      departamento       ?? proveedorActual.departamento,
-      direccion          ?? proveedorActual.direccion,
-      estado             ?? proveedorActual.estado,
-      notas              ?? proveedorActual.notas,
-      id
+      data.nombre_proveedor,
+      data.nombre_contacto,
+      data.telefono,
+      data.telefono_alt,
+      data.email,
+      data.nit,
+      data.ciudad,
+      data.departamento,
+      data.direccion,
+      data.estado,
+      data.notas,
+      idProveedor
     ]
   );
 
-  if (result.affectedRows === 0) return null;
-
-  return await getProveedorById(id);
+  return getProveedorById(idProveedor);
 }
 
-// Eliminar proveedor (DELETE real en BD)
-async function deleteProveedor(id) {
+
+// =====================================================
+// ELIMINAR PROVEEDOR
+// =====================================================
+async function deleteProveedor(idProveedor) {
   const [result] = await db.query(
-    'DELETE FROM proveedores WHERE id_proveedor = ?',
-    [id]
+    `
+        DELETE FROM proveedores
+        WHERE id_proveedor = ?
+        `,
+    [idProveedor]
   );
+
   return result.affectedRows > 0;
 }
+
 
 module.exports = {
   getAllProveedores,
   getProveedorById,
+  buscarDuplicado,
   createProveedor,
   updateProveedor,
   deleteProveedor
