@@ -28,6 +28,20 @@ function obtenerIdValido(valor) {
     return id;
 }
 
+function limpiarTexto(valor) {
+    if (typeof valor !== 'string') {
+        return '';
+    }
+
+    return valor.trim();
+}
+
+function textoOpcional(valor) {
+    const texto = limpiarTexto(valor);
+
+    return texto === '' ? null : texto;
+}
+
 function convertirBooleano(valor) {
     return (
         valor === true ||
@@ -37,10 +51,18 @@ function convertirBooleano(valor) {
     ) ? 1 : 0;
 }
 
+function correoValido(correo) {
+    if (!correo) {
+        return true;
+    }
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
+}
+
 
 // =====================================================
 // GET /api/usuarios
-// Listar todos los usuarios
+// LISTAR USUARIOS
 // =====================================================
 exports.listarUsuarios = async (req, res) => {
     try {
@@ -74,7 +96,7 @@ exports.listarUsuarios = async (req, res) => {
 
 // =====================================================
 // GET /api/usuarios/:id
-// Obtener un usuario por ID
+// OBTENER USUARIO POR ID
 // =====================================================
 exports.obtenerUsuarioPorId = async (req, res) => {
     try {
@@ -126,45 +148,59 @@ exports.obtenerUsuarioPorId = async (req, res) => {
 
 // =====================================================
 // POST /api/usuarios
-// Crear un nuevo usuario
+// CREAR USUARIO
 // =====================================================
 exports.crearUsuario = async (req, res) => {
     try {
-        const {
-            nombre_completo,
-            usuario,
-            correo,
-            rol,
-            password,
-            password_confirm,
-            estado,
-            debe_cambiar_password
-        } = req.body;
+        const nombreFinal = limpiarTexto(
+            req.body.nombre_completo
+        );
 
-        const nombreFinal =
-            typeof nombre_completo === 'string'
-                ? nombre_completo.trim()
+        const usuarioFinal = limpiarTexto(
+            req.body.usuario
+        );
+
+        const correoFinal = textoOpcional(
+            req.body.correo
+        );
+
+        const rol = limpiarTexto(
+            req.body.rol
+        );
+
+        const estadoRecibido = limpiarTexto(
+            req.body.estado
+        );
+
+        const password =
+            typeof req.body.password === 'string'
+                ? req.body.password
                 : '';
 
-        const usuarioFinal =
-            typeof usuario === 'string'
-                ? usuario.trim()
+        const passwordConfirm =
+            typeof req.body.password_confirm === 'string'
+                ? req.body.password_confirm
                 : '';
 
-        const correoFinal =
-            typeof correo === 'string' && correo.trim() !== ''
-                ? correo.trim()
-                : null;
+        const estadoFinal =
+            ESTADOS_PERMITIDOS.includes(estadoRecibido)
+                ? estadoRecibido
+                : 'activo';
+
+        const debeCambiarPassword = convertirBooleano(
+            req.body.debe_cambiar_password
+        );
 
         if (
             !nombreFinal ||
             !usuarioFinal ||
             !rol ||
             !password ||
-            !password_confirm
+            !passwordConfirm
         ) {
             return res.status(400).json({
-                message: 'Por favor completa los campos obligatorios.'
+                message:
+                    'Por favor completa los campos obligatorios.'
             });
         }
 
@@ -174,11 +210,14 @@ exports.crearUsuario = async (req, res) => {
             });
         }
 
-        const estadoFinal = ESTADOS_PERMITIDOS.includes(estado)
-            ? estado
-            : 'activo';
+        if (!correoValido(correoFinal)) {
+            return res.status(400).json({
+                message:
+                    'El correo electrónico no es válido.'
+            });
+        }
 
-        if (password !== password_confirm) {
+        if (password !== passwordConfirm) {
             return res.status(400).json({
                 message: 'Las contraseñas no coinciden.'
             });
@@ -186,11 +225,13 @@ exports.crearUsuario = async (req, res) => {
 
         if (password.length < 6) {
             return res.status(400).json({
-                message: 'La contraseña debe contener al menos 6 caracteres.'
+                message:
+                    'La contraseña debe contener al menos 6 caracteres.'
             });
         }
 
-        const [usuariosExistentes] = await db.query(
+        // Verificar nombre de usuario duplicado
+        const [usuarioDuplicado] = await db.query(
             `
             SELECT id_usuario
             FROM usuarios
@@ -200,14 +241,16 @@ exports.crearUsuario = async (req, res) => {
             [usuarioFinal]
         );
 
-        if (usuariosExistentes.length > 0) {
+        if (usuarioDuplicado.length > 0) {
             return res.status(409).json({
-                message: 'El nombre de usuario ya está en uso.'
+                message:
+                    'El nombre de usuario ya está en uso.'
             });
         }
 
+        // Verificar correo duplicado
         if (correoFinal) {
-            const [correosExistentes] = await db.query(
+            const [correoDuplicado] = await db.query(
                 `
                 SELECT id_usuario
                 FROM usuarios
@@ -217,9 +260,10 @@ exports.crearUsuario = async (req, res) => {
                 [correoFinal]
             );
 
-            if (correosExistentes.length > 0) {
+            if (correoDuplicado.length > 0) {
                 return res.status(409).json({
-                    message: 'El correo electrónico ya está registrado.'
+                    message:
+                        'El correo electrónico ya está registrado.'
                 });
             }
         }
@@ -227,10 +271,6 @@ exports.crearUsuario = async (req, res) => {
         const passwordHash = await bcrypt.hash(
             password,
             SALT_ROUNDS
-        );
-
-        const debeCambiarPassword = convertirBooleano(
-            debe_cambiar_password
         );
 
         const [result] = await db.query(
@@ -268,7 +308,7 @@ exports.crearUsuario = async (req, res) => {
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(409).json({
                 message:
-                    'El nombre de usuario o correo electrónico ya está registrado.'
+                    'El usuario o correo electrónico ya está registrado.'
             });
         }
 
@@ -281,7 +321,7 @@ exports.crearUsuario = async (req, res) => {
 
 // =====================================================
 // PUT /api/usuarios/:id
-// Actualizar un usuario
+// ACTUALIZAR USUARIO
 // =====================================================
 exports.actualizarUsuario = async (req, res) => {
     try {
@@ -293,31 +333,39 @@ exports.actualizarUsuario = async (req, res) => {
             });
         }
 
-        const {
-            nombre_completo,
-            usuario,
-            correo,
-            rol,
-            password,
-            password_confirm,
-            estado,
-            debe_cambiar_password
-        } = req.body;
+        const nombreFinal = limpiarTexto(
+            req.body.nombre_completo
+        );
 
-        const nombreFinal =
-            typeof nombre_completo === 'string'
-                ? nombre_completo.trim()
+        const usuarioFinal = limpiarTexto(
+            req.body.usuario
+        );
+
+        const correoFinal = textoOpcional(
+            req.body.correo
+        );
+
+        const rol = limpiarTexto(
+            req.body.rol
+        );
+
+        const estado = limpiarTexto(
+            req.body.estado
+        );
+
+        const password =
+            typeof req.body.password === 'string'
+                ? req.body.password
                 : '';
 
-        const usuarioFinal =
-            typeof usuario === 'string'
-                ? usuario.trim()
+        const passwordConfirm =
+            typeof req.body.password_confirm === 'string'
+                ? req.body.password_confirm
                 : '';
 
-        const correoFinal =
-            typeof correo === 'string' && correo.trim() !== ''
-                ? correo.trim()
-                : null;
+        const debeCambiarPassword = convertirBooleano(
+            req.body.debe_cambiar_password
+        );
 
         if (
             !nombreFinal ||
@@ -327,7 +375,7 @@ exports.actualizarUsuario = async (req, res) => {
         ) {
             return res.status(400).json({
                 message:
-                    'Nombre completo, usuario, rol y estado son obligatorios.'
+                    'Nombre, usuario, rol y estado son obligatorios.'
             });
         }
 
@@ -343,8 +391,15 @@ exports.actualizarUsuario = async (req, res) => {
             });
         }
 
-        // Verificar que el usuario exista
-        const [usuarioActual] = await db.query(
+        if (!correoValido(correoFinal)) {
+            return res.status(400).json({
+                message:
+                    'El correo electrónico no es válido.'
+            });
+        }
+
+        // Comprobar que el usuario exista
+        const [usuarioExistente] = await db.query(
             `
             SELECT id_usuario
             FROM usuarios
@@ -354,13 +409,14 @@ exports.actualizarUsuario = async (req, res) => {
             [idUsuario]
         );
 
-        if (usuarioActual.length === 0) {
+        if (usuarioExistente.length === 0) {
             return res.status(404).json({
-                message: 'El usuario que intentas editar no existe.'
+                message:
+                    'El usuario que intentas editar no existe.'
             });
         }
 
-        // Comprobar que otro registro no tenga el mismo usuario
+        // Comprobar usuario duplicado, excluyendo el actual
         const [usuarioDuplicado] = await db.query(
             `
             SELECT id_usuario
@@ -377,11 +433,12 @@ exports.actualizarUsuario = async (req, res) => {
 
         if (usuarioDuplicado.length > 0) {
             return res.status(409).json({
-                message: 'El nombre de usuario ya está en uso.'
+                message:
+                    'Otro usuario ya utiliza ese nombre de usuario.'
             });
         }
 
-        // Comprobar que otro registro no tenga el mismo correo
+        // Comprobar correo duplicado, excluyendo el actual
         if (correoFinal) {
             const [correoDuplicado] = await db.query(
                 `
@@ -399,55 +456,41 @@ exports.actualizarUsuario = async (req, res) => {
 
             if (correoDuplicado.length > 0) {
                 return res.status(409).json({
-                    message: 'El correo electrónico ya está registrado.'
+                    message:
+                        'Otro usuario ya utiliza ese correo electrónico.'
                 });
             }
         }
 
-        const debeCambiarPassword = convertirBooleano(
-            debe_cambiar_password
-        );
-
-        const nuevaPassword =
-            typeof password === 'string'
-                ? password
-                : '';
-
-        const confirmacionPassword =
-            typeof password_confirm === 'string'
-                ? password_confirm
-                : '';
-
-        const quiereCambiarPassword =
-            nuevaPassword !== '' ||
-            confirmacionPassword !== '';
+        const cambiarPassword =
+            password !== '' ||
+            passwordConfirm !== '';
 
         let result;
 
-        // Actualizar también la contraseña
-        if (quiereCambiarPassword) {
-            if (!nuevaPassword || !confirmacionPassword) {
+        if (cambiarPassword) {
+            if (!password || !passwordConfirm) {
                 return res.status(400).json({
                     message:
                         'Debes escribir y confirmar la nueva contraseña.'
                 });
             }
 
-            if (nuevaPassword !== confirmacionPassword) {
+            if (password !== passwordConfirm) {
                 return res.status(400).json({
                     message: 'Las contraseñas no coinciden.'
                 });
             }
 
-            if (nuevaPassword.length < 6) {
+            if (password.length < 6) {
                 return res.status(400).json({
                     message:
-                        'La contraseña debe contener al menos 6 caracteres.'
+                        'La nueva contraseña debe contener al menos 6 caracteres.'
                 });
             }
 
-            const nuevoPasswordHash = await bcrypt.hash(
-                nuevaPassword,
+            const passwordHash = await bcrypt.hash(
+                password,
                 SALT_ROUNDS
             );
 
@@ -470,7 +513,7 @@ exports.actualizarUsuario = async (req, res) => {
                     usuarioFinal,
                     correoFinal,
                     rol,
-                    nuevoPasswordHash,
+                    passwordHash,
                     estado,
                     debeCambiarPassword,
                     idUsuario
@@ -478,7 +521,6 @@ exports.actualizarUsuario = async (req, res) => {
             );
 
         } else {
-            // Actualizar sin modificar la contraseña
             [result] = await db.query(
                 `
                 UPDATE usuarios
@@ -521,12 +563,13 @@ exports.actualizarUsuario = async (req, res) => {
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(409).json({
                 message:
-                    'El nombre de usuario o correo electrónico ya está registrado.'
+                    'El usuario o correo electrónico ya está registrado.'
             });
         }
 
         return res.status(500).json({
-            message: 'Error interno al actualizar el usuario.'
+            message:
+                'Error interno al actualizar el usuario.'
         });
     }
 };
@@ -534,7 +577,7 @@ exports.actualizarUsuario = async (req, res) => {
 
 // =====================================================
 // DELETE /api/usuarios/:id
-// Eliminar un usuario
+// ELIMINAR USUARIO
 // =====================================================
 exports.eliminarUsuario = async (req, res) => {
     try {
@@ -577,8 +620,7 @@ exports.eliminarUsuario = async (req, res) => {
 
         if (result.affectedRows === 0) {
             return res.status(404).json({
-                message:
-                    'No se pudo encontrar el usuario para eliminarlo.'
+                message: 'No se pudo eliminar el usuario.'
             });
         }
 

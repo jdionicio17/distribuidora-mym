@@ -2,12 +2,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==================================================
     // ELEMENTOS GENERALES
     // ==================================================
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('sidebar');
-    const yearSpan = document.getElementById('year');
+    const sidebarToggle =
+        document.getElementById('sidebarToggle');
 
-    const form = document.querySelector('.user-form');
-    const tbody = document.getElementById('usuarios-tbody');
+    const sidebar =
+        document.getElementById('sidebar');
+
+    const yearSpan =
+        document.getElementById('year');
+
+    const form =
+        document.querySelector('.user-form');
+
+    const tbody =
+        document.getElementById('usuarios-tbody');
 
     const nombreCompletoInput =
         document.getElementById('nombre_completo');
@@ -41,42 +49,55 @@ document.addEventListener('DOMContentLoaded', () => {
         ? form.querySelector('button[type="reset"]')
         : null;
 
-    const tituloFormulario =
-        document.querySelector(
-            '.section .section-header h3'
-        );
+    const seccionFormulario = form
+        ? form.closest('.section')
+        : null;
 
-    const descripcionFormulario =
-        document.querySelector(
-            '.section .section-header p'
-        );
+    const tituloFormulario = seccionFormulario
+        ? seccionFormulario.querySelector(
+            '.section-header h3'
+        )
+        : null;
+
+    const descripcionFormulario = seccionFormulario
+        ? seccionFormulario.querySelector(
+            '.section-header p'
+        )
+        : null;
 
     const labelPassword =
-        document.querySelector('label[for="password"]');
+        document.querySelector(
+            'label[for="password"]'
+        );
 
     const labelPasswordConfirm =
         document.querySelector(
             'label[for="password_confirm"]'
         );
 
-    let idUsuarioEditando = null;
-
-    // Quitar barras finales a API_BASE
     const BASE_URL =
         typeof API_BASE !== 'undefined'
             ? String(API_BASE).replace(/\/+$/, '')
             : '';
 
-    const USUARIOS_URL = `${BASE_URL}/api/usuarios`;
+    const USUARIOS_URL =
+        `${BASE_URL}/api/usuarios`;
+
+    let idUsuarioEditando = null;
 
 
     // ==================================================
     // SIDEBAR
     // ==================================================
     if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-open');
-        });
+        sidebarToggle.addEventListener(
+            'click',
+            () => {
+                sidebar.classList.toggle(
+                    'sidebar-open'
+                );
+            }
+        );
     }
 
 
@@ -84,7 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // AÑO DEL FOOTER
     // ==================================================
     if (yearSpan) {
-        yearSpan.textContent = new Date().getFullYear();
+        yearSpan.textContent =
+            new Date().getFullYear();
     }
 
 
@@ -160,9 +182,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==================================================
-    // ACTIVAR MODO CREACIÓN
+    // RESTABLECER BOTÓN GUARDAR
+    // ==================================================
+    function actualizarBotonGuardar() {
+        if (!botonGuardar) {
+            return;
+        }
+
+        if (idUsuarioEditando === null) {
+            botonGuardar.innerHTML = `
+                <i class="fa-solid fa-user-plus"></i>
+                &nbsp;Guardar usuario
+            `;
+        } else {
+            botonGuardar.innerHTML = `
+                <i class="fa-solid fa-floppy-disk"></i>
+                &nbsp;Actualizar usuario
+            `;
+        }
+    }
+
+
+    // ==================================================
+    // MODO CREACIÓN
     // ==================================================
     function activarModoCreacion() {
+        /*
+         * No existe ningún evento "reset" que vuelva a
+         * ejecutar esta función. Esto elimina el ciclo
+         * que borraba los datos al editar.
+         */
+
         idUsuarioEditando = null;
 
         if (form) {
@@ -174,17 +224,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (passwordInput) {
+            passwordInput.value = '';
             passwordInput.required = true;
             passwordInput.placeholder = '';
         }
 
         if (passwordConfirmInput) {
+            passwordConfirmInput.value = '';
             passwordConfirmInput.required = true;
             passwordConfirmInput.placeholder = '';
         }
 
         if (tituloFormulario) {
-            tituloFormulario.textContent = 'Registrar usuario';
+            tituloFormulario.textContent =
+                'Registrar usuario';
         }
 
         if (descripcionFormulario) {
@@ -193,19 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (labelPassword) {
-            labelPassword.textContent = 'Contraseña';
+            labelPassword.textContent =
+                'Contraseña';
         }
 
         if (labelPasswordConfirm) {
             labelPasswordConfirm.textContent =
                 'Confirmar contraseña';
-        }
-
-        if (botonGuardar) {
-            botonGuardar.innerHTML = `
-                <i class="fa-solid fa-user-plus"></i>
-                &nbsp;Guardar usuario
-            `;
         }
 
         if (botonLimpiar) {
@@ -214,14 +261,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 &nbsp;Limpiar
             `;
         }
+
+        actualizarBotonGuardar();
     }
 
 
     // ==================================================
-    // ACTIVAR MODO EDICIÓN
+    // MODO EDICIÓN
     // ==================================================
     function activarModoEdicion(usuarioData) {
-        idUsuarioEditando = usuarioData.id_usuario;
+        idUsuarioEditando =
+            Number(usuarioData.id_usuario);
 
         nombreCompletoInput.value =
             usuarioData.nombre_completo || '';
@@ -239,24 +289,27 @@ document.addEventListener('DOMContentLoaded', () => {
             usuarioData.estado || 'activo';
 
         cambiarPasswordInput.checked =
-            Number(usuarioData.debe_cambiar_password) === 1;
+            Number(
+                usuarioData.debe_cambiar_password
+            ) === 1;
 
-        // La contraseña no se devuelve desde el backend
+        // No se muestra el hash guardado
         passwordInput.value = '';
         passwordConfirmInput.value = '';
 
-        // Durante la edición, cambiar contraseña es opcional
+        // En edición la contraseña es opcional
         passwordInput.required = false;
         passwordConfirmInput.required = false;
 
         passwordInput.placeholder =
-            'Dejar vacío para conservar la contraseña';
+            'Vacío para conservar la contraseña actual';
 
         passwordConfirmInput.placeholder =
-            'Dejar vacío para conservar la contraseña';
+            'Vacío para conservar la contraseña actual';
 
         if (tituloFormulario) {
-            tituloFormulario.textContent = 'Editar usuario';
+            tituloFormulario.textContent =
+                'Editar usuario';
         }
 
         if (descripcionFormulario) {
@@ -274,13 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Confirmar nueva contraseña';
         }
 
-        if (botonGuardar) {
-            botonGuardar.innerHTML = `
-                <i class="fa-solid fa-floppy-disk"></i>
-                &nbsp;Actualizar usuario
-            `;
-        }
-
         if (botonLimpiar) {
             botonLimpiar.innerHTML = `
                 <i class="fa-solid fa-xmark"></i>
@@ -288,12 +334,29 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
+        actualizarBotonGuardar();
+
         form.scrollIntoView({
             behavior: 'smooth',
             block: 'start'
         });
 
         nombreCompletoInput.focus();
+    }
+
+
+    // ==================================================
+    // CREAR CELDA SEGURA
+    // ==================================================
+    function crearCelda(texto) {
+        const td = document.createElement('td');
+
+        td.textContent =
+            texto === null || texto === undefined
+                ? ''
+                : String(texto);
+
+        return td;
     }
 
 
@@ -314,19 +377,23 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         try {
-            const respuesta = await fetch(USUARIOS_URL, {
-                method: 'GET',
-                headers: {
-                    Accept: 'application/json'
+            const respuesta = await fetch(
+                USUARIOS_URL,
+                {
+                    method: 'GET',
+                    headers: {
+                        Accept: 'application/json'
+                    }
                 }
-            });
+            );
 
-            const usuarios = await leerRespuesta(respuesta);
+            const usuarios =
+                await leerRespuesta(respuesta);
 
             if (!respuesta.ok) {
                 throw new Error(
                     usuarios.message ||
-                    'Error al obtener los usuarios.'
+                    'Error al obtener usuarios.'
                 );
             }
 
@@ -339,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="6" class="empty-row">
-                            Sin usuarios registrados aún.
+                            Sin usuarios registrados.
                         </td>
                     </tr>
                 `;
@@ -348,67 +415,70 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             usuarios.forEach((usuarioData) => {
-                const fila = document.createElement('tr');
+                const fila =
+                    document.createElement('tr');
+
+                fila.dataset.id =
+                    usuarioData.id_usuario;
 
                 // Usuario
-                const tdUsuario = document.createElement('td');
-
-                tdUsuario.textContent =
-                    usuarioData.usuario || '';
-
-                fila.appendChild(tdUsuario);
+                fila.appendChild(
+                    crearCelda(usuarioData.usuario)
+                );
 
                 // Nombre completo
-                const tdNombre = document.createElement('td');
-
-                tdNombre.textContent =
-                    usuarioData.nombre_completo || '';
-
-                fila.appendChild(tdNombre);
+                fila.appendChild(
+                    crearCelda(
+                        usuarioData.nombre_completo
+                    )
+                );
 
                 // Rol
-                const tdRol = document.createElement('td');
-
-                tdRol.textContent =
-                    formatearRol(usuarioData.rol);
-
-                fila.appendChild(tdRol);
+                fila.appendChild(
+                    crearCelda(
+                        formatearRol(usuarioData.rol)
+                    )
+                );
 
                 // Estado
-                const tdEstado = document.createElement('td');
+                const tdEstado =
+                    document.createElement('td');
 
-                const spanEstado =
+                const badgeEstado =
                     document.createElement('span');
 
-                spanEstado.classList.add('badge');
+                badgeEstado.classList.add('badge');
 
-                if (usuarioData.estado === 'activo') {
-                    spanEstado.classList.add(
+                if (
+                    usuarioData.estado === 'activo'
+                ) {
+                    badgeEstado.classList.add(
                         'badge-success'
                     );
 
-                    spanEstado.textContent = 'Activo';
+                    badgeEstado.textContent =
+                        'Activo';
 
                 } else {
-                    spanEstado.classList.add(
+                    badgeEstado.classList.add(
                         'badge-danger'
                     );
 
-                    spanEstado.textContent = 'Inactivo';
+                    badgeEstado.textContent =
+                        'Inactivo';
                 }
 
-                tdEstado.appendChild(spanEstado);
+                tdEstado.appendChild(badgeEstado);
                 fila.appendChild(tdEstado);
 
                 // Último acceso
-                const tdAcceso = document.createElement('td');
-
-                tdAcceso.textContent =
-                    formatearFecha(
-                        usuarioData.ultimo_acceso
-                    );
-
-                fila.appendChild(tdAcceso);
+                fila.appendChild(
+                    crearCelda(
+                        formatearFecha(
+                            usuarioData.ultimo_acceso
+                        )
+                    )
+                );
 
                 // Acciones
                 const tdAcciones =
@@ -435,9 +505,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i class="fa-solid fa-pen-to-square"></i>
                 `;
 
-                btnEditar.addEventListener('click', () => {
-                    activarModoEdicion(usuarioData);
-                });
+                btnEditar.addEventListener(
+                    'click',
+                    () => {
+                        activarModoEdicion(
+                            usuarioData
+                        );
+                    }
+                );
 
                 tdAcciones.appendChild(btnEditar);
 
@@ -505,11 +580,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nombreUsuario,
         boton
     ) {
-        if (!idUsuario) {
-            alert('No se encontró el ID del usuario.');
-            return;
-        }
-
         const confirmar = window.confirm(
             `¿Estás seguro de eliminar al usuario "${nombreUsuario}"?\n\nEsta acción no se puede deshacer.`
         );
@@ -518,7 +588,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const contenidoOriginal = boton.innerHTML;
+        const contenidoOriginal =
+            boton.innerHTML;
 
         boton.disabled = true;
 
@@ -537,7 +608,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             );
 
-            const data = await leerRespuesta(respuesta);
+            const data =
+                await leerRespuesta(respuesta);
 
             if (!respuesta.ok) {
                 alert(
@@ -553,7 +625,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Usuario eliminado correctamente.'
             );
 
-            if (idUsuarioEditando === idUsuario) {
+            if (
+                Number(idUsuarioEditando) ===
+                Number(idUsuario)
+            ) {
                 activarModoCreacion();
             }
 
@@ -566,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             alert(
-                'No fue posible comunicarse con el servidor.'
+                'Error de comunicación con el servidor.'
             );
 
         } finally {
@@ -577,192 +652,205 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==================================================
-    // GUARDAR O ACTUALIZAR USUARIO
+    // CREAR O ACTUALIZAR USUARIO
     // ==================================================
     if (form) {
-        form.addEventListener('submit', async (evento) => {
-            evento.preventDefault();
+        form.addEventListener(
+            'submit',
+            async (evento) => {
+                evento.preventDefault();
 
-            const nombre_completo =
-                nombreCompletoInput.value.trim();
+                const nombre_completo =
+                    nombreCompletoInput.value.trim();
 
-            const usuario =
-                usuarioInput.value.trim();
+                const usuario =
+                    usuarioInput.value.trim();
 
-            const correo =
-                correoInput.value.trim();
+                const correo =
+                    correoInput.value.trim();
 
-            const rol =
-                rolInput.value;
+                const rol =
+                    rolInput.value;
 
-            const password =
-                passwordInput.value;
+                const password =
+                    passwordInput.value;
 
-            const password_confirm =
-                passwordConfirmInput.value;
+                const password_confirm =
+                    passwordConfirmInput.value;
 
-            const estado =
-                estadoInput.value;
+                const estado =
+                    estadoInput.value;
 
-            const debe_cambiar_password =
-                cambiarPasswordInput.checked;
+                const debe_cambiar_password =
+                    cambiarPasswordInput.checked;
 
-            const estaEditando =
-                idUsuarioEditando !== null;
+                const estaEditando =
+                    idUsuarioEditando !== null;
 
-            if (
-                !nombre_completo ||
-                !usuario ||
-                !rol ||
-                !estado
-            ) {
-                alert(
-                    'Por favor completa los campos obligatorios.'
-                );
-
-                return;
-            }
-
-            // Al crear, la contraseña es obligatoria
-            if (
-                !estaEditando &&
-                (!password || !password_confirm)
-            ) {
-                alert(
-                    'Debes escribir y confirmar la contraseña.'
-                );
-
-                return;
-            }
-
-            // Al editar, solo validar contraseña cuando se escribió
-            const intentaCambiarPassword =
-                password !== '' ||
-                password_confirm !== '';
-
-            if (
-                intentaCambiarPassword &&
-                (!password || !password_confirm)
-            ) {
-                alert(
-                    'Debes escribir y confirmar la nueva contraseña.'
-                );
-
-                return;
-            }
-
-            if (
-                intentaCambiarPassword &&
-                password !== password_confirm
-            ) {
-                alert('Las contraseñas no coinciden.');
-                return;
-            }
-
-            if (
-                intentaCambiarPassword &&
-                password.length < 6
-            ) {
-                alert(
-                    'La contraseña debe tener al menos 6 caracteres.'
-                );
-
-                return;
-            }
-
-            const metodo = estaEditando
-                ? 'PUT'
-                : 'POST';
-
-            const url = estaEditando
-                ? `${USUARIOS_URL}/${encodeURIComponent(idUsuarioEditando)}`
-                : USUARIOS_URL;
-
-            const contenidoOriginal =
-                botonGuardar.innerHTML;
-
-            botonGuardar.disabled = true;
-
-            botonGuardar.innerHTML = `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                &nbsp;Guardando...
-            `;
-
-            try {
-                const respuesta = await fetch(url, {
-                    method: metodo,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nombre_completo,
-                        usuario,
-                        correo,
-                        rol,
-                        password,
-                        password_confirm,
-                        estado,
-                        debe_cambiar_password
-                    })
-                });
-
-                const data =
-                    await leerRespuesta(respuesta);
-
-                if (!respuesta.ok) {
+                if (
+                    !nombre_completo ||
+                    !usuario ||
+                    !rol ||
+                    !estado
+                ) {
                     alert(
-                        data.message ||
-                        'No se pudo guardar el usuario.'
+                        'Completa los campos obligatorios.'
                     );
 
                     return;
                 }
 
-                alert(
-                    data.message ||
-                    (
-                        estaEditando
-                            ? 'Usuario actualizado correctamente.'
-                            : 'Usuario registrado correctamente.'
-                    )
-                );
+                // Contraseña obligatoria al crear
+                if (
+                    !estaEditando &&
+                    (!password || !password_confirm)
+                ) {
+                    alert(
+                        'Debes escribir y confirmar la contraseña.'
+                    );
 
-                activarModoCreacion();
-                await cargarUsuarios();
+                    return;
+                }
 
-            } catch (error) {
-                console.error(
-                    'Error al guardar usuario:',
-                    error
-                );
+                const intentaCambiarPassword =
+                    password !== '' ||
+                    password_confirm !== '';
 
-                alert(
-                    'Error de comunicación con el servidor.'
-                );
+                if (
+                    intentaCambiarPassword &&
+                    (!password || !password_confirm)
+                ) {
+                    alert(
+                        'Debes escribir y confirmar la nueva contraseña.'
+                    );
 
-            } finally {
-                botonGuardar.disabled = false;
+                    return;
+                }
 
-                if (idUsuarioEditando === null) {
-                    botonGuardar.innerHTML = `
-                        <i class="fa-solid fa-user-plus"></i>
-                        &nbsp;Guardar usuario
-                    `;
-                } else {
-                    botonGuardar.innerHTML =
-                        contenidoOriginal;
+                if (
+                    intentaCambiarPassword &&
+                    password !== password_confirm
+                ) {
+                    alert(
+                        'Las contraseñas no coinciden.'
+                    );
+
+                    return;
+                }
+
+                if (
+                    intentaCambiarPassword &&
+                    password.length < 6
+                ) {
+                    alert(
+                        'La contraseña debe tener al menos 6 caracteres.'
+                    );
+
+                    return;
+                }
+
+                const metodo =
+                    estaEditando
+                        ? 'PUT'
+                        : 'POST';
+
+                const url =
+                    estaEditando
+                        ? `${USUARIOS_URL}/${encodeURIComponent(idUsuarioEditando)}`
+                        : USUARIOS_URL;
+
+                botonGuardar.disabled = true;
+
+                botonGuardar.innerHTML = `
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    &nbsp;Guardando...
+                `;
+
+                try {
+                    const respuesta = await fetch(
+                        url,
+                        {
+                            method: metodo,
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json',
+
+                                Accept:
+                                    'application/json'
+                            },
+
+                            body: JSON.stringify({
+                                nombre_completo,
+                                usuario,
+                                correo,
+                                rol,
+                                password,
+                                password_confirm,
+                                estado,
+                                debe_cambiar_password
+                            })
+                        }
+                    );
+
+                    const data =
+                        await leerRespuesta(respuesta);
+
+                    if (!respuesta.ok) {
+                        alert(
+                            data.message ||
+                            'No se pudo guardar el usuario.'
+                        );
+
+                        return;
+                    }
+
+                    alert(
+                        data.message ||
+                        (
+                            estaEditando
+                                ? 'Usuario actualizado correctamente.'
+                                : 'Usuario creado correctamente.'
+                        )
+                    );
+
+                    activarModoCreacion();
+                    await cargarUsuarios();
+
+                } catch (error) {
+                    console.error(
+                        'Error al guardar usuario:',
+                        error
+                    );
+
+                    alert(
+                        'Error de comunicación con el servidor.'
+                    );
+
+                } finally {
+                    botonGuardar.disabled = false;
+                    actualizarBotonGuardar();
                 }
             }
-        });
+        );
+    }
 
 
-        // Botón limpiar o cancelar edición
-        form.addEventListener('reset', () => {
-            window.setTimeout(() => {
+    // ==================================================
+    // LIMPIAR O CANCELAR EDICIÓN
+    // ==================================================
+    if (botonLimpiar) {
+        botonLimpiar.addEventListener(
+            'click',
+            (evento) => {
+                /*
+                 * Se evita el reset automático y se
+                 * controla manualmente.
+                 */
+                evento.preventDefault();
                 activarModoCreacion();
-            }, 0);
-        });
+            }
+        );
     }
 
 
